@@ -1,0 +1,62 @@
+{
+ "assets/supply_chain/producer.webp": {
+  "title": "Coffee farmers harvesting coffee.jpg",
+  "artist": "Jameswasswa",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Coffee_farmers_harvesting_coffee.jpg"
+ },
+ "assets/supply_chain/coop.webp": {
+  "title": "Sifting good beans from bad.jpg",
+  "artist": "DFID - UK Department for International Development",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Sifting_good_beans_from_bad.jpg"
+ },
+ "assets/supply_chain/collect.webp": {
+  "title": "Harvested Ugandan coffee 1.jpg",
+  "artist": "Denis kasozi",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Harvested_Ugandan_coffee_1.jpg"
+ },
+ "assets/supply_chain/process.webp": {
+  "title": "Coffee being sun-dried.jpg",
+  "artist": "Denis kasozi",
+  "license": "CC BY 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Coffee_being_sun-dried.jpg"
+ },
+ "assets/supply_chain/export.webp": {
+  "title": "Thousands of bean bags.jpg",
+  "artist": "DFID - UK Department for International Development",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Thousands_of_bean_bags.jpg"
+ },
+ "assets/supply_chain/port.webp": {
+  "title": "2015 07 31 Mombasa Port JPEG RESIZED 0033.jpg",
+  "artist": "Ministry of East African Affairs, Commerce &amp; Touri",
+  "license": "Public domain",
+  "source": "https://commons.wikimedia.org/wiki/File:2015_07_31_Mombasa_Port_JPEG_RESIZED_0033.jpg"
+ },
+ "assets/supply_chain/transport.webp": {
+  "title": "Container ship exiting Mombasa port.jpg",
+  "artist": "Ian Kiptoo",
+  "license": "CC BY 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Container_ship_exiting_Mombasa_port.jpg"
+ },
+ "assets/supply_chain/buyer.webp": {
+  "title": "Tasty Coffee sourcing Ethiopia Addis Ababa Siz Agro cupping 2025.jpg",
+  "artist": "Indigo.udm",
+  "license": "CC BY 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Tasty_Coffee_sourcing_Ethiopia_Addis_Ababa_Siz_Agro_cupping_2025.jpg"
+ },
+ "assets/supply_chain/roaster.webp": {
+  "title": "A worker at the roastery checks on the progress of coffee beans in the roasting machine.jpg",
+  "artist": "Jameswasswa",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:A_worker_at_the_roastery_checks_on_the_progress_of_coffee_beans_in_the_roasting_machine.jpg"
+ },
+ "assets/icon/icon.png": {
+  "title": "Coffee Beans Photographed in Macro.jpg",
+  "artist": "Wikimedia Commons",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Coffee_Beans_Photographed_in_Macro.jpg"
+ }
+}
