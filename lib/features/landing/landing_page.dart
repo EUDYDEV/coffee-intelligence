@@ -260,9 +260,14 @@ class _Stage extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(0, -_e(g, 0, .05) * 40),
             child: Column(children: [
-              Text('COFFEE\nINTELLIGENCE',
+              Text(context.tr('org_acronym'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: TS.display, fontSize: mobile ? 40 : 70, fontWeight: FontWeight.w800, height: 1.0, letterSpacing: mobile ? 2 : 4, color: p.text)),
+                  style: TextStyle(fontFamily: TS.display, fontSize: mobile ? 64 : 110, fontWeight: FontWeight.w800, height: 1.0, letterSpacing: mobile ? 6 : 12, color: p.text)),
+              const SizedBox(height: 10),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: mobile ? 24 : 0),
+                child: Text(context.tr('org_full').toUpperCase(), textAlign: TextAlign.center, style: TS.label(p).copyWith(fontSize: mobile ? 11 : 14, letterSpacing: 3, color: p.gold)),
+              ),
               const SizedBox(height: 18),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: mobile ? 28 : 0),

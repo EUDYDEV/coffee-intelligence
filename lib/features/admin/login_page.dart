@@ -14,7 +14,7 @@ class AdminLogin extends StatefulWidget {
 }
 
 class _AdminLoginState extends State<AdminLogin> {
-  final _u = TextEditingController();
+  final _u = TextEditingController(text: 'admin');
   final _p = TextEditingController();
   bool _err = false, _show = false, _busy = false;
 
@@ -26,6 +26,10 @@ class _AdminLoginState extends State<AdminLogin> {
   }
 
   Future<void> _submit() async {
+    if (_u.text.trim().isEmpty || _p.text.isEmpty) {
+      setState(() => _err = true);
+      return;
+    }
     setState(() {
       _busy = true;
       _err = false;
@@ -68,7 +72,7 @@ class _AdminLoginState extends State<AdminLogin> {
                       const SizedBox(height: 22),
                       TextField(
                         controller: _u,
-                        autofocus: true,
+                        autofocus: false,
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(labelText: context.tr('admin_user'), prefixIcon: const Icon(Icons.person_outline_rounded), border: OutlineInputBorder(borderRadius: BorderRadius.circular(14))),
                       ),
@@ -87,7 +91,7 @@ class _AdminLoginState extends State<AdminLogin> {
                       if (_err)
                         Padding(
                           padding: const EdgeInsets.only(top: 10),
-                          child: Text(context.tr('admin_error'), style: TextStyle(color: p.alert, fontWeight: FontWeight.w600, fontSize: 13)),
+                          child: Text(_u.text.trim().isEmpty ? context.tr('admin_user_req') : (_p.text.isEmpty ? context.tr('admin_pass_req') : context.tr('admin_error')), style: TextStyle(color: p.alert, fontWeight: FontWeight.w600, fontSize: 13)),
                         ),
                       const SizedBox(height: 18),
                       _busy
@@ -95,6 +99,8 @@ class _AdminLoginState extends State<AdminLogin> {
                           : Center(child: PrimaryButton(context.tr('admin_signin'), icon: Icons.login_rounded, onTap: _submit)),
                       const SizedBox(height: 14),
                       Center(child: TextButton(onPressed: context.app.closeLogin, child: Text(context.tr('admin_back')))),
+                      const SizedBox(height: 4),
+                      Text(context.tr('admin_demo_hint'), textAlign: TextAlign.center, style: TS.h3(p).copyWith(fontSize: 12.5, color: p.gold)),
                       const SizedBox(height: 4),
                       Text(context.tr('admin_demo_note'), textAlign: TextAlign.center, style: TS.bodyS(p).copyWith(fontSize: 11)),
                     ]),

@@ -1,4 +1,4 @@
-# Coffee Intelligence — démo interactive
+# OIAC / IACO — plateforme de données du café (démo interactive)
 
 Maquette interactive d'une plateforme de Business Intelligence pour le secteur mondial du café (focus Afrique).
 **Une seule base de code Flutter** : Web, Android (et iOS).
