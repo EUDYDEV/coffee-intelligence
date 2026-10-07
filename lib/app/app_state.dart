@@ -18,6 +18,7 @@ class AppState extends ChangeNotifier {
   // ---- admin (front-end demo only: NOT real security) ----
   static const demoAdminUser = 'admin';
   static const demoAdminPass = 'coffee2026';
+  String adminUser = demoAdminUser;
   bool showLogin = false; // login screen visible
   bool admin = false; // logged in
   bool adminView = false; // admin area (vs. public view while logged in)
@@ -53,7 +54,9 @@ class AppState extends ChangeNotifier {
   }
 
   bool login(String u, String p) {
-    if (u.trim() == demoAdminUser && p == demoAdminPass) {
+    // Front-end demo: any non-empty credentials are accepted.
+    if (u.trim().isNotEmpty && p.isNotEmpty) {
+      adminUser = u.trim();
       admin = true;
       adminView = true;
       showLogin = false;

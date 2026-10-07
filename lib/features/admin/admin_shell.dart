@@ -72,7 +72,7 @@ class AdminShell extends StatelessWidget {
         if (mobile) ...[const OrgLogo(height: 30, emblem: true), const SizedBox(width: 8)],
         _adminBadge(context),
         const SizedBox(width: 10),
-        if (!mobile) Text(context.tr('adm_signed_as', [AppStateAdmin.user]), style: TS.bodyS(p)),
+        if (!mobile) Text(context.tr('adm_signed_as', [app.adminUser]), style: TS.bodyS(p)),
         const Spacer(),
         if (!mobile) ...[const LangToggle(), const SizedBox(width: 8), const CurrencyPicker(compact: true), const SizedBox(width: 8), const ThemeToggle(), const SizedBox(width: 12)],
         if (mobile) ...[const LangToggle(), const SizedBox(width: 6), const CurrencyPicker(compact: true), const SizedBox(width: 4)],
