@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'app/app_state.dart';
 import 'core/theme/app_theme.dart';
 import 'features/shell/app_shell.dart';
+import 'features/shell/nav.dart';
 
 void main() {
+  AppState.pageIds = navItems.map((e) => e.id).toList();
   runApp(const CoffeeIntelligenceApp());
 }
 
@@ -14,7 +16,7 @@ class CoffeeIntelligenceApp extends StatefulWidget {
 }
 
 class _CoffeeIntelligenceAppState extends State<CoffeeIntelligenceApp> {
-  final AppState _state = AppState();
+  final AppState _state = AppState()..applyUri(Uri.base);
 
   @override
   void dispose() {

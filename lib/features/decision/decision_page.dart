@@ -11,6 +11,8 @@ import '../../widgets/charts.dart';
 import '../../widgets/common.dart';
 import '../../widgets/layout.dart';
 import '../shell/nav.dart';
+import '../../widgets/drag_grid.dart';
+import 'role_dashboard.dart';
 
 class DecisionPage extends StatelessWidget {
   const DecisionPage({super.key});
@@ -28,15 +30,20 @@ class DecisionPage extends StatelessWidget {
       const _ArrivalIntro(),
       Reveal(child: const _PulseCard()),
       gap24,
+      const RoleBanner(),
       SectionLabel(context.tr('key_indicators')),
-      Grid(columns: context.cols(desktop: 3, tablet: 2, mobile: 1), children: [
-        Reveal(delay: 100, child: KpiCard(labelKey: 'kpi_price', metric: 'price_arabica', value: arab.last.v, decimals: 2, unit: '\$/lb', trend: (arab.last.v / arab[arab.length - 2].v - 1) * 100, icon: Icons.show_chart_rounded, spark: spark)),
-        Reveal(delay: 160, child: KpiCard(labelKey: 'kpi_prod', metric: 'production', value: prod, unit: 'kt', trend: 3.4, icon: Icons.spa_rounded, spark: repo.africaProdHistory())),
-        Reveal(delay: 220, child: KpiCard(labelKey: 'kpi_income', metric: 'income', value: repo.africaIncome(), unit: '\$', trend: -2.1, icon: Icons.payments_rounded, spark: const [1210, 1190, 1240, 1180, 1160, 1150, 1170, 1130])),
-        Reveal(delay: 280, child: KpiCard(labelKey: 'kpi_exports', metric: 'exports', value: repo.africaExports(), unit: 'kt', trend: -4.8, icon: Icons.directions_boat_rounded, spark: const [980, 1010, 990, 1040, 1000, 940, 910, 893])),
-        Reveal(delay: 340, child: KpiCard(labelKey: 'kpi_climate', metric: 'climate', value: climate, unit: '/100', trend: 6.2, invertTrend: true, icon: Icons.cloud_rounded, spark: const [52, 54, 53, 58, 61, 63, 64, 66])),
-        Reveal(delay: 400, child: KpiCard(labelKey: 'kpi_forecast', metric: 'price_arabica', value: fc.forecast.last.v, decimals: 2, unit: '\$/lb', trend: (fc.forecast.last.v / arab.last.v - 1) * 100, icon: Icons.query_stats_rounded, spark: [...spark.sublist(6), ...fc.forecast.map((e) => e.v)])),
-      ]),
+      Builder(builder: (_) {
+        final ks = roleKpis(context);
+        return DragGrid(
+          columns: context.cols(desktop: 3, tablet: 2, mobile: 1),
+          order: context.app.kpiOrder[context.app.role] ?? List.generate(ks.length, (i) => i),
+          onReorder: context.app.setKpiOrder,
+          children: [for (var i = 0; i < ks.length; i++) Reveal(delay: 100 + i * 60, child: ks[i])],
+        );
+      }),
+      Padding(padding: const EdgeInsets.only(top: 6), child: Row(children: [Icon(Icons.open_with_rounded, size: 14, color: context.pal.muted), const SizedBox(width: 6), Text(context.tr('drag_hint'), style: TS.bodyS(context.pal).copyWith(fontSize: 11))])),
+      gap24,
+      const RolePanel(),
       gap24,
       TwoCol(
         flexL: 5,

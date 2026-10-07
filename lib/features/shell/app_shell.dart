@@ -11,7 +11,9 @@ import '../admin/admin_shell.dart';
 import '../admin/login_page.dart';
 import '../../widgets/secret_tap.dart';
 import '../landing/landing_page.dart';
+import '../../data/role_data.dart';
 import 'nav.dart';
+import 'role_widgets.dart';
 import 'top_controls.dart';
 
 class AppShell extends StatefulWidget {
@@ -78,6 +80,7 @@ class _AppShellState extends State<AppShell> {
       if (mounted) _syncAuto();
     });
     if (app.showLogin) return const AdminLogin();
+    if (app.showRoleChooser) return const RoleChooserScreen();
     if (app.admin && app.adminView) return const AdminShell();
     if (app.showLanding) {
       return AnimatedSwitcher(duration: context.dur(500), child: const LandingPage(key: ValueKey('landing')));
@@ -176,7 +179,9 @@ class _AppShellState extends State<AppShell> {
       builder: (c) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(18),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
+          child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Align(alignment: Alignment.centerLeft, child: Wrap(spacing: 10, runSpacing: 8, children: [RoleSwitcher(), CurrencyPicker()])),
+            const SizedBox(height: 12),
             Wrap(spacing: 10, runSpacing: 10, children: [
               for (var i = 0; i < navItems.length; i++)
                 SizedBox(
@@ -193,7 +198,7 @@ class _AppShellState extends State<AppShell> {
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: context.app.page == i ? p.accent : p.border)),
                       child: Column(children: [
-                        Icon(navItems[i].icon, color: p.accent),
+                        Icon(context.app.isRestricted(navItems[i].id) ? Icons.lock_rounded : navItems[i].icon, color: context.app.isRestricted(navItems[i].id) ? p.muted : p.accent),
                         const SizedBox(height: 6),
                         Text(context.tr(navItems[i].labelKey), textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: p.text, fontWeight: FontWeight.w600), maxLines: 2),
                       ]),
@@ -214,7 +219,7 @@ class _AppShellState extends State<AppShell> {
                 context.app.openLanding();
               }),
             ]),
-          ]),
+          ])),
         ),
       ),
     );
@@ -226,11 +231,14 @@ class _PageHost extends StatelessWidget {
   const _PageHost({super.key, required this.index});
   @override
   Widget build(BuildContext context) {
+    final nav = navItems[index];
+    final locked = context.app.isRestricted(nav.id);
     final pad = context.isMobile ? 16.0 : (context.isTablet ? 24.0 : 32.0);
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(pad, context.isMobile ? 10 : 6, pad, 120),
-      child: Center(
-        child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 1360), child: navItems[index].build()),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 1360), child: locked ? RestrictedPage(pageNameKey: nav.labelKey) : RepaintBoundary(key: context.app.exportKey, child: nav.build())),
       ),
     );
   }
@@ -265,9 +273,24 @@ class _Sidebar extends StatelessWidget {
                   : const Center(child: OrgLogo(height: 40, emblem: true)),
             ),
           ),
+          Padding(padding: const EdgeInsets.fromLTRB(12, 0, 12, 10), child: RoleSwitcher(dark: true, compact: !extended)),
           Expanded(
             child: ListView(padding: const EdgeInsets.symmetric(horizontal: 10), children: [
-              for (var i = 0; i < navItems.length - 1; i++) _NavTile(i: i, extended: extended),
+              if (extended) Padding(padding: const EdgeInsets.fromLTRB(6, 2, 6, 6), child: Text(context.tr('nav_for_you').toUpperCase(), style: TextStyle(fontSize: 9.5, letterSpacing: 1.4, fontWeight: FontWeight.w700, color: CI.gold.withValues(alpha: .8)))),
+              for (final i in primaryIndices(app.roleDef.primary)) _NavTile(i: i, extended: extended),
+              GestureDetector(
+                onTap: app.toggleNav,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: extended ? 10 : 0, vertical: 10),
+                  child: Row(mainAxisAlignment: extended ? MainAxisAlignment.start : MainAxisAlignment.center, children: [
+                    Icon(app.navExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded, size: 18, color: CI.cream.withValues(alpha: .6)),
+                    if (extended) ...[const SizedBox(width: 8), Text(context.tr('nav_all_pages'), style: TextStyle(fontSize: 12, color: CI.cream.withValues(alpha: .6), fontWeight: FontWeight.w600))],
+                  ]),
+                ),
+              ),
+              if (app.navExpanded)
+                for (var i = 0; i < navItems.length - 1; i++)
+                  if (!app.roleDef.primary.contains(navItems[i].id)) _NavTile(i: i, extended: extended),
             ]),
           ),
           const Divider(color: Colors.white12, height: 1),
@@ -318,10 +341,11 @@ class _NavTileState extends State<_NavTile> {
             border: Border(left: BorderSide(color: sel ? CI.gold : Colors.transparent, width: 3)),
           ),
           child: Row(mainAxisAlignment: widget.extended ? MainAxisAlignment.start : MainAxisAlignment.center, children: [
-            Icon(n.icon, size: 20, color: sel ? CI.gold : CI.cream.withValues(alpha: .7)),
+            Icon(n.icon, size: 20, color: sel ? CI.gold : CI.cream.withValues(alpha: app.isRestricted(n.id) ? .35 : .7)),
             if (widget.extended) ...[
               const SizedBox(width: 12),
-              Expanded(child: Text(context.tr(n.labelKey), style: TextStyle(fontSize: 13.5, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: sel ? CI.cream : CI.cream.withValues(alpha: .75)))),
+              Expanded(child: Text(context.tr(n.labelKey), style: TextStyle(fontSize: 13.5, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: sel ? CI.cream : CI.cream.withValues(alpha: app.isRestricted(n.id) ? .4 : .75)))),
+              if (app.isRestricted(n.id)) Icon(Icons.lock_rounded, size: 14, color: CI.cream.withValues(alpha: .4)),
             ],
           ]),
         ),
@@ -345,6 +369,9 @@ class _DesktopTop extends StatelessWidget {
         const SizedBox(width: 8),
         Text(context.tr('live_demo'), style: TS.label(p)),
         const Spacer(),
+        Text('${context.tr('role_profile')} : ', style: TS.bodyS(p)),
+        Text(context.tr(app.roleDef.nameKey), style: TS.h3(p).copyWith(color: app.roleDef.color)),
+        const SizedBox(width: 14),
         PrimaryButton(app.presentation ? context.tr('exit_presentation') : context.tr('presentation_mode'),
             icon: app.presentation ? Icons.close_rounded : Icons.slideshow_rounded, outlined: true, onTap: () {
           app.setPresentation(!app.presentation);
@@ -368,9 +395,9 @@ class _MobileTop extends StatelessWidget {
         SecretTap(onTriple: context.app.openLogin, child: const OrgLogo(height: 30, emblem: true)),
         const SizedBox(width: 8),
         Expanded(child: Text(context.tr('org_short'), style: TextStyle(fontFamily: TS.display, fontWeight: FontWeight.w800, fontSize: 14, letterSpacing: 1.6, color: p.text))),
-        const LangToggle(),
+        const RoleSwitcher(compact: true),
         const SizedBox(width: 6),
-        const CurrencyPicker(compact: true),
+        const LangToggle(),
         const SizedBox(width: 6),
         const ThemeToggle(),
       ]),
@@ -385,7 +412,7 @@ class _BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.pal;
     final app = context.app;
-    final main = [0, 1, 6, 10];
+    final main = primaryIndices(app.roleDef.primary).take(4).toList();
     Widget item(IconData icon, String label, bool sel, VoidCallback onTap) => Expanded(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,

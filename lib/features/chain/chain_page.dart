@@ -8,6 +8,7 @@ import '../../widgets/chain_photo.dart';
 import '../../widgets/charts.dart';
 import '../../widgets/common.dart';
 import '../../widgets/layout.dart';
+import 'lots_view.dart';
 
 class ChainPage extends StatefulWidget {
   const ChainPage({super.key});
@@ -26,6 +27,9 @@ class _ChainPageState extends State<ChainPage> {
     final statusCol = [p.green, p.gold, p.alert][s.status];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       PageHeader('chain_title', 'chain_sub'),
+      Reveal(child: Segmented<String>(values: const ['flow', 'lots'], selected: context.app.chainTab, label: (v) => context.tr('chain_tab_$v'), onChanged: context.app.setChainTab)),
+      gap16,
+      if (context.app.chainTab == 'lots') const LotsView() else ...[
       GlassCard(
         padding: const EdgeInsets.fromLTRB(18, 22, 18, 14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -81,6 +85,7 @@ class _ChainPageState extends State<ChainPage> {
           ),
         ),
       ),
+      ],
     ]);
   }
 }

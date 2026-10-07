@@ -49,7 +49,7 @@ class SustainabilityPage extends StatelessWidget {
               child: Column(children: [
                 Text(context.tr('sustain_index').toUpperCase(), style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.w700, fontSize: 11, color: CI.cream.withValues(alpha: .7))),
                 const SizedBox(height: 14),
-                RingGauge(b.overall, size: 190, color: CI.gold, caption: '/100', pulse: true),
+                RingGauge(b.overall, size: 190, color: CI.gold, textColor: CI.cream, caption: '/100', pulse: true),
                 const SizedBox(height: 14),
                 Text('${c.flag} ${context.tr(c.nameKey)}', style: const TextStyle(color: CI.cream, fontFamily: TS.display, fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 4),

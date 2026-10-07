@@ -6,11 +6,13 @@ import '../../data/repository.dart';
 import '../../models/models.dart';
 import '../../widgets/charts.dart';
 import '../../widgets/common.dart';
+import '../../widgets/drilldown.dart';
 import '../../widgets/layout.dart';
 import '../../widgets/map/map_view.dart';
 
 class ProductionPage extends StatefulWidget {
-  const ProductionPage({super.key});
+  final bool showHeader;
+  const ProductionPage({super.key, this.showHeader = true});
   @override
   State<ProductionPage> createState() => _ProductionPageState();
 }
@@ -30,13 +32,15 @@ class _ProductionPageState extends State<ProductionPage> {
     final totalArea = af.fold(0.0, (a, x) => a + x.areaKha);
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      PageHeader('production_title', 'production_sub'),
+      if (widget.showHeader) PageHeader('production_title', 'production_sub'),
       Grid(columns: context.cols(desktop: 4, tablet: 2, mobile: 2), gap: 12, children: [
         Reveal(child: KpiCard(labelKey: 'kpi_prod', metric: 'production', value: totalProd, unit: 'kt', trend: 3.4, icon: Icons.spa_rounded)),
         Reveal(delay: 80, child: KpiCard(labelKey: 'kpi_yield', metric: 'production', value: totalProd / totalArea * 1000, unit: 'kg/ha', trend: 1.9, icon: Icons.grass_rounded)),
         Reveal(delay: 160, child: KpiCard(labelKey: 'kpi_area', metric: 'production', value: totalArea, unit: 'kha', trend: .6, icon: Icons.landscape_rounded)),
         Reveal(delay: 240, child: KpiCard(labelKey: 'kpi_producers', metric: 'production', value: totalProducers, unit: 'k', trend: 1.2, icon: Icons.people_alt_rounded)),
       ]),
+      gap24,
+      const DrillDown(),
       gap24,
       TwoCol(
         flexL: 6,

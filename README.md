@@ -71,3 +71,21 @@ Tous les textes sont dans `lib/core/i18n/strings.dart` (`clé: [fr, en]`). Utili
 Taper **3 fois de suite sur le logo** (barre latérale, entête mobile ou accueil) ouvre la page de connexion.
 Démo front-end : « Se connecter » fonctionne même avec les champs vides (aucune sécurité réelle) ; seul le triple tap protège l'accès.
 Pages : tableau de bord admin, toutes les données (tableaux, recherche, copie CSV), vente de données (mise en vente, prix, ventes simulées), ajout manuel et import CSV.
+
+## Profils (vues par rôle)
+Le sélecteur « Profil » (barre latérale / en-tête) simule les 5 groupes d'utilisateurs du cahier des charges
+(Agriculteur/Coopérative, Exportateur/Négociant, Office national, Torréfacteur, ONG/Bailleur) + Administrateur :
+menus, indicateurs, panneaux et pages réservées changent. **Simulation sans sécurité réelle.**
+
+## Nouveautés fonctionnelles
+- **Production & Qualité** : onglets Production (avec explorateur drill-down Afrique → pays → région → coopérative → producteur → lot), Qualité (fiches pays/région/coopérative/lot, profil sensoriel, comparaison aux références) et Climat & Production (météo, prévisions, impact estimé).
+- **Comparaison** : multi-niveaux + « Ma coopérative vs référence ».
+- **Certifications** : registre Fairtrade / Rainforest / UTZ / Bio / 4C + parcours de certification.
+- **Chaîne du café** : onglet « Traçabilité par lot ».
+- **Exports** : CSV, PDF (généré localement) et PNG sur les pages principales.
+- **Rapports** : génération animée, PDF/CSV réels, planification (envoi e-mail simulé).
+- **Alertes** : règles SI … ALORS ….
+- **Admin** : utilisateurs, rôles & permissions, sources, flux de données, qualité des données, KPI Manager, règles d'alertes.
+- **Cahier des charges** : page de conformité (exigence → fonction → écran → statut).
+
+Liens directs utiles : `?enter=1&role=coop&page=production&tab=quality&lang=en&cur=EUR`.

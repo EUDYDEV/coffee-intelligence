@@ -650,7 +650,8 @@ class RingGauge extends StatelessWidget {
   final Color? color;
   final String? caption;
   final bool pulse;
-  const RingGauge(this.value, {super.key, this.size = 150, this.color, this.caption, this.pulse = false});
+  final Color? textColor;
+  const RingGauge(this.value, {super.key, this.size = 150, this.color, this.caption, this.pulse = false, this.textColor});
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
@@ -670,8 +671,8 @@ class RingGauge extends StatelessWidget {
             painter: _RingPainter(v, col, p, t, pulse),
             child: Center(
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text(Fmt.num(v, 0), style: TS.big(p, size: size * .3)),
-                if (caption != null) Text(caption!, style: TS.label(p)),
+                Text(Fmt.num(v, 0), style: TS.big(p, size: size * .3).copyWith(color: textColor)),
+                if (caption != null) Text(caption!, style: TS.label(p).copyWith(color: textColor?.withValues(alpha: .7))),
               ]),
             ),
           ),

@@ -4,8 +4,10 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/palette.dart';
 import '../../widgets/common.dart';
 import '../../widgets/org_logo.dart';
+import '../shell/role_widgets.dart';
 import '../shell/top_controls.dart';
 import 'admin_pages.dart';
+import 'admin_pages2.dart';
 
 class _AdminNav {
   final IconData icon;
@@ -19,6 +21,13 @@ final _nav = <_AdminNav>[
   _AdminNav(Icons.dataset_rounded, 'adm_nav_data', () => const AdminDataPage()),
   _AdminNav(Icons.sell_rounded, 'adm_nav_sales', () => const AdminSalesPage()),
   _AdminNav(Icons.edit_note_rounded, 'adm_nav_add', () => const AdminAddPage()),
+  _AdminNav(Icons.manage_accounts_rounded, 'adm_nav_users', () => const AdminUsersPage()),
+  _AdminNav(Icons.lock_person_rounded, 'adm_nav_roles', () => const AdminRolesPage()),
+  _AdminNav(Icons.hub_rounded, 'adm_nav_sources', () => const AdminSourcesPage()),
+  _AdminNav(Icons.swap_calls_rounded, 'adm_nav_flows', () => const AdminFlowsPage()),
+  _AdminNav(Icons.rule_rounded, 'adm_nav_quality', () => const AdminQualityPage()),
+  _AdminNav(Icons.speed_rounded, 'adm_nav_kpis', () => const AdminKpiPage()),
+  _AdminNav(Icons.rule_folder_rounded, 'adm_nav_rules', () => const AdminRulesPage()),
 ];
 
 /// Administrator area: a different dashboard from the public platform.
@@ -35,7 +44,7 @@ class AdminShell extends StatelessWidget {
       child: SingleChildScrollView(
         key: ValueKey('${app.adminPage}'),
         padding: EdgeInsets.fromLTRB(mobile ? 16 : 32, 12, mobile ? 16 : 32, 100),
-        child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 1360), child: _nav[app.adminPage].build())),
+        child: Align(alignment: Alignment.topCenter, child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 1360), child: _nav[app.adminPage].build())),
       ),
     );
     return Scaffold(
@@ -74,7 +83,7 @@ class AdminShell extends StatelessWidget {
         const SizedBox(width: 10),
         if (!mobile) Text(context.tr('adm_signed_as', [app.adminUser]), style: TS.bodyS(p)),
         const Spacer(),
-        if (!mobile) ...[const LangToggle(), const SizedBox(width: 8), const CurrencyPicker(compact: true), const SizedBox(width: 8), const ThemeToggle(), const SizedBox(width: 12)],
+        if (!mobile) ...[const RoleSwitcher(compact: true), const SizedBox(width: 8), const LangToggle(), const SizedBox(width: 8), const CurrencyPicker(compact: true), const SizedBox(width: 8), const ThemeToggle(), const SizedBox(width: 12)],
         if (mobile) ...[const LangToggle(), const SizedBox(width: 6), const CurrencyPicker(compact: true), const SizedBox(width: 4)],
         mobile
             ? IconButton(tooltip: context.tr('adm_view_public'), onPressed: () => app.setAdminView(false), icon: Icon(Icons.public_rounded, color: p.accent))
@@ -143,27 +152,60 @@ class AdminShell extends StatelessWidget {
   Widget _bottom(BuildContext context) {
     final p = context.pal;
     final app = context.app;
+    Widget item(IconData icon, String label, bool sel, VoidCallback onTap) => Expanded(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Icon(icon, color: sel ? p.accent : p.muted),
+                const SizedBox(height: 2),
+                Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: sel ? p.accent : p.muted)),
+              ]),
+            ),
+          ),
+        );
     return Container(
       decoration: BoxDecoration(color: p.surface, border: Border(top: BorderSide(color: p.border))),
       child: SafeArea(
         top: false,
         child: Row(children: [
-          for (var i = 0; i < _nav.length; i++)
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => app.gotoAdmin(i),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(_nav[i].icon, color: app.adminPage == i ? p.accent : p.muted),
-                    const SizedBox(height: 2),
-                    Text(context.tr(_nav[i].labelKey), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10, fontWeight: app.adminPage == i ? FontWeight.w700 : FontWeight.w500, color: app.adminPage == i ? p.accent : p.muted)),
-                  ]),
+          for (var i = 0; i < 4; i++) item(_nav[i].icon, context.tr(_nav[i].labelKey), app.adminPage == i, () => app.gotoAdmin(i)),
+          item(Icons.apps_rounded, context.tr('more'), app.adminPage >= 4, () => _more(context)),
+        ]),
+      ),
+    );
+  }
+
+  void _more(BuildContext context) {
+    final p = context.pal;
+    final app = context.app;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: p.surface,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (c) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Wrap(spacing: 10, runSpacing: 10, children: [
+            for (var i = 0; i < _nav.length; i++)
+              SizedBox(
+                width: (MediaQuery.sizeOf(c).width - 32 - 20) / 3,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(c);
+                    app.gotoAdmin(i);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+                    decoration: BoxDecoration(color: app.adminPage == i ? p.accent.withValues(alpha: .15) : p.surface2, borderRadius: BorderRadius.circular(14), border: Border.all(color: app.adminPage == i ? p.accent : p.border)),
+                    child: Column(children: [Icon(_nav[i].icon, color: p.accent), const SizedBox(height: 6), Text(context.tr(_nav[i].labelKey), textAlign: TextAlign.center, maxLines: 2, style: TextStyle(fontSize: 11, color: p.text, fontWeight: FontWeight.w600))]),
+                  ),
                 ),
               ),
-            ),
-        ]),
+          ]),
+        ),
       ),
     );
   }

@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import '../core/format.dart';
+import '../data/admin2_data.dart';
 import '../data/admin_data.dart';
+import '../data/role_data.dart';
 import '../models/models.dart';
 
 /// Global UI state (theme, language, motion, navigation, user-created alerts).
 class AppState extends ChangeNotifier {
+  /// Page ids in navigation order (set once by the navigation module).
+  static List<String> pageIds = const [];
+  static const exportable = {'decision', 'market', 'production', 'revenue', 'sustain', 'certs', 'chain', 'map', 'compare', 'forecast', 'anomalies', 'alerts', 'sources'};
+  static String? currentPageId(int i) => i >= 0 && i < pageIds.length ? pageIds[i] : null;
+
   ThemeMode themeMode = ThemeMode.light;
   String lang = 'fr';
   bool reduceMotion = false;
@@ -14,6 +21,83 @@ class AppState extends ChangeNotifier {
   int page = 0;
   String selectedCountry = 'ETH';
   final List<UserAlert> userAlerts = [];
+
+  final GlobalKey exportKey = GlobalKey(); // page content captured for PNG export
+
+  // ---- simulated profile (role) ----
+  String role = 'board';
+  String myCoop = 'c2'; // cooperative of the "farmer / cooperative" profile
+  String myCountry = 'CIV'; // country of the "national board" profile
+  String productionTab = 'production'; // production | quality | climate
+  String chainTab = 'flow'; // flow | lots
+  String selectedLot = '';
+  bool showRoleChooser = false;
+  bool navExpanded = false;
+  final Map<String, List<int>> kpiOrder = {}; // per profile, drag-and-drop order of the KPI cards
+  void setKpiOrder(List<int> o) {
+    kpiOrder[role] = o;
+    notifyListeners();
+  }
+
+  RoleDef get roleDef => roleById(role);
+  bool isRestricted(String pageId) => roleDef.restricted.contains(pageId);
+
+  void setRole(String id, {bool go = true}) {
+    role = id;
+    final r = roleById(id);
+    productionTab = r.productionTab;
+    chainTab = r.chainTab;
+    showRoleChooser = false;
+    showLanding = false;
+    if (id == 'admin' && admin) {
+      adminView = true;
+    } else {
+      adminView = false;
+      if (go) page = 0; // decision center is always first
+    }
+    addLog('log_role', id);
+    notifyListeners();
+  }
+
+  void openRoleChooser() {
+    showRoleChooser = true;
+    notifyListeners();
+  }
+
+  void setMyCoop(String id) {
+    myCoop = id;
+    notifyListeners();
+  }
+
+  void setMyCountry(String id) {
+    myCountry = id;
+    notifyListeners();
+  }
+
+  void setProductionTab(String t) {
+    productionTab = t;
+    notifyListeners();
+  }
+
+  void setChainTab(String t, {String? lot}) {
+    chainTab = t;
+    if (lot != null) selectedLot = lot;
+    notifyListeners();
+  }
+
+  void toggleNav() {
+    navExpanded = !navExpanded;
+    notifyListeners();
+  }
+
+  // ---- extra admin / demo state ----
+  final Map<String, Map<String, bool>> perms = {for (final r in roles) r.id: Map<String, bool>.of(r.perms)};
+  final List<AppUser> users = seedUsers();
+  final List<SourceOps> sourceOps = seedSourceOps();
+  final List<QualityIssue> issues = seedIssues();
+  final List<KpiDef> kpis = seedKpis();
+  final List<AlertRule> rules = seedRules();
+  final List<ReportSchedule> schedules = seedSchedules();
 
   // ---- admin (front-end demo only: NOT real security) ----
   static const demoAdminUser = 'admin';
@@ -57,9 +141,10 @@ class AppState extends ChangeNotifier {
   bool login(String u, String p) {
     adminUser = u.trim().isEmpty ? demoAdminUser : u.trim();
     admin = true;
-    adminView = true;
+    adminView = false;
     showLogin = false;
     showLanding = false;
+    showRoleChooser = true; // login → choose a role → matching workspace
     adminPage = 0;
     addLog('log_login', adminUser);
     notifyListeners();
@@ -70,6 +155,8 @@ class AppState extends ChangeNotifier {
     addLog('log_logout', '');
     admin = false;
     adminView = false;
+    showRoleChooser = false;
+    if (role == 'admin') role = 'board';
     page = 0;
     notifyListeners();
   }
@@ -105,6 +192,50 @@ class AppState extends ChangeNotifier {
     orders.insert(0, Order(buyer, d.id, d.priceUsd, DateTime.now()));
     addLog('log_sale', d.id);
     notifyListeners();
+  }
+
+  /// Deep links such as ?enter=1&role=coop&page=production&tab=quality&lang=en (handy for demos and tests).
+  void applyUri(Uri u) {
+    final q = u.queryParameters;
+    if (q['lang'] != null) setLang(q['lang']!);
+    if (q['theme'] == 'dark') themeMode = ThemeMode.dark;
+    if (q['cur'] != null) {
+      final c = currencies.where((x) => x.code == q['cur']).firstOrNull;
+      if (c != null) Fmt.cur = c;
+    }
+    if (q['enter'] == '1') showLanding = false;
+    if (q['admin'] == '1') {
+      admin = true;
+      showLanding = false;
+    }
+    if (q['role'] != null && roles.any((r) => r.id == q['role'])) {
+      role = q['role']!;
+      final r = roleById(role);
+      productionTab = r.productionTab;
+      chainTab = r.chainTab;
+      showLanding = false;
+      if (role == 'admin') {
+        admin = true;
+        adminView = true;
+      }
+    }
+    if (q['tab'] != null) {
+      productionTab = q['tab']!;
+      if (q['tab'] == 'lots' || q['tab'] == 'flow') chainTab = q['tab']!;
+    }
+    if (q['apage'] != null) {
+      admin = true;
+      adminView = true;
+      showLanding = false;
+      adminPage = int.tryParse(q['apage']!) ?? 0;
+    }
+    if (q['page'] != null) {
+      final i = pageIds.indexOf(q['page']!);
+      if (i >= 0) {
+        page = i;
+        showLanding = false;
+      }
+    }
   }
 
   void setLang(String l) {

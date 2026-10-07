@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../app/app_state.dart';
 import '../core/ctx.dart';
+import 'export_button.dart';
 import '../core/format.dart';
 import '../core/theme/app_theme.dart';
 import '../core/theme/palette.dart';
@@ -212,10 +214,14 @@ class DemoTag extends StatelessWidget {
 class PageHeader extends StatelessWidget {
   final String titleKey, subKey;
   final Widget? trailing;
-  const PageHeader(this.titleKey, this.subKey, {super.key, this.trailing});
+  final String? exportId;
+  const PageHeader(this.titleKey, this.subKey, {super.key, this.trailing, this.exportId});
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
+    final id = exportId ?? AppState.currentPageId(context.app.page);
+    final exp = !context.app.adminView && id != null && AppState.exportable.contains(id) ? ExportButton(pageId: id) : null;
+    final trailing = (exp == null) ? this.trailing : (this.trailing == null ? exp : Wrap(spacing: 10, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [this.trailing!, exp]));
     final title = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
         Flexible(
@@ -552,9 +558,12 @@ class _TrustBody extends StatelessWidget {
         Text(label, style: TS.bodyS(p).copyWith(fontSize: 14)),
         const SizedBox(height: 14),
         row('trust_source', context.tr(prov.sourceKey)),
+        row('trust_collected', '${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year} ${prov.received}'),
         row('trust_updated', context.tr('ago', [prov.updatedAgo])),
-        row('trust_quality', Fmt.pct(prov.quality, 0)),
-        row('trust_confidence', context.tr(prov.confidenceKey), c: conf),
+        row('trust_quality', '${Fmt.pct(prov.quality, 0)} · ${context.tr(prov.quality >= 90 ? 'q_high' : (prov.quality >= 75 ? 'q_medium' : 'q_low'))}'),
+        row('trust_confidence', '${context.tr(prov.confidenceKey)} · ${{'conf_high': 94, 'conf_med': 78, 'conf_low': 55}[prov.confidenceKey]} %', c: conf),
+        row('trust_type', context.tr('demo_type')),
+        row('trust_transform', context.tr('trust_transform_n', [prov.processing.length])),
         const Divider(height: 28),
         Text(context.tr('trust_lineage').toUpperCase(), style: TS.label(p)),
         const SizedBox(height: 10),

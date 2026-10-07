@@ -7,6 +7,7 @@ import '../../data/repository.dart';
 import '../../models/models.dart';
 import '../../widgets/common.dart';
 import '../../widgets/layout.dart';
+import 'rules_panel.dart';
 
 class AlertsPage extends StatefulWidget {
   const AlertsPage({super.key});
@@ -168,6 +169,8 @@ class _AlertsPageState extends State<AlertsPage> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       PageHeader('alerts_title', 'alerts_sub'),
       TwoCol(flexL: 6, flexR: 4, stretch: false, left: feed, right: create),
+      gap24,
+      const RulesPanel(),
     ]);
   }
 }
