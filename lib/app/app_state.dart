@@ -53,20 +53,17 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Front-end demo: sign-in always succeeds, even with empty fields.
   bool login(String u, String p) {
-    // Front-end demo: any non-empty credentials are accepted.
-    if (u.trim().isNotEmpty && p.isNotEmpty) {
-      adminUser = u.trim();
-      admin = true;
-      adminView = true;
-      showLogin = false;
-      showLanding = false;
-      adminPage = 0;
-      addLog('log_login', u.trim());
-      notifyListeners();
-      return true;
-    }
-    return false;
+    adminUser = u.trim().isEmpty ? demoAdminUser : u.trim();
+    admin = true;
+    adminView = true;
+    showLogin = false;
+    showLanding = false;
+    adminPage = 0;
+    addLog('log_login', adminUser);
+    notifyListeners();
+    return true;
   }
 
   void logout() {

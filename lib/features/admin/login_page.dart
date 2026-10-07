@@ -14,7 +14,7 @@ class AdminLogin extends StatefulWidget {
 }
 
 class _AdminLoginState extends State<AdminLogin> {
-  final _u = TextEditingController(text: 'admin');
+  final _u = TextEditingController();
   final _p = TextEditingController();
   bool _err = false, _show = false, _busy = false;
 
@@ -26,10 +26,6 @@ class _AdminLoginState extends State<AdminLogin> {
   }
 
   Future<void> _submit() async {
-    if (_u.text.trim().isEmpty || _p.text.isEmpty) {
-      setState(() => _err = true);
-      return;
-    }
     setState(() {
       _busy = true;
       _err = false;

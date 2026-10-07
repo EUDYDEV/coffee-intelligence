@@ -583,7 +583,7 @@ class Strings {
     'admin_error': ['Identifiant ou mot de passe incorrect.', 'Incorrect username or password.'],
     'admin_user_req': ['Identifiant requis.', 'Username required.'],
     'admin_pass_req': ['Mot de passe requis (n’importe lequel en démo).', 'Password required (any value in demo).'],
-    'admin_demo_hint': ['Démo : tout identifiant et tout mot de passe sont acceptés', 'Demo: any username and password are accepted'],
+    'admin_demo_hint': ['Démo : laissez les champs vides et appuyez sur « Se connecter »', 'Demo: leave the fields empty and press “Sign in”'],
     'admin_signin': ['Se connecter', 'Sign in'],
     'admin_back': ['Retour au site', 'Back to the site'],
     'admin_demo_note': ['Démo front-end : la connexion est simulée localement et n’offre aucune sécurité réelle.', 'Front-end demo: sign-in is simulated locally and provides no real security.'],

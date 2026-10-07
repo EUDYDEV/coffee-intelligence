@@ -69,5 +69,5 @@ Tous les textes sont dans `lib/core/i18n/strings.dart` (`clé: [fr, en]`). Utili
 
 ## Espace administrateur (démo front-end)
 Taper **3 fois de suite sur le logo** (barre latérale, entête mobile ou accueil) ouvre la page de connexion.
-Démo front-end : tout identifiant et mot de passe non vides sont acceptés (aucune sécurité réelle) ; seul le triple tap protège l'accès.
+Démo front-end : « Se connecter » fonctionne même avec les champs vides (aucune sécurité réelle) ; seul le triple tap protège l'accès.
 Pages : tableau de bord admin, toutes les données (tableaux, recherche, copie CSV), vente de données (mise en vente, prix, ventes simulées), ajout manuel et import CSV.
