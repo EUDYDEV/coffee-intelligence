@@ -140,7 +140,7 @@ class _TopBar extends StatelessWidget {
         SecretTap(onTriple: context.app.openLogin, child: OrgLogo(height: context.isMobile ? 32 : 46, emblem: context.isMobile)),
         const SizedBox(width: 12),
         if (!context.isMobile)
-          Text('COFFEE INTELLIGENCE', style: TextStyle(fontFamily: TS.display, fontWeight: FontWeight.w700, letterSpacing: 1.6, color: p.text, fontSize: 14)),
+          Text(context.tr('org_name').toUpperCase(), style: TextStyle(fontFamily: TS.display, fontWeight: FontWeight.w700, letterSpacing: 1.6, color: p.text, fontSize: 14)),
         const Spacer(),
         const LangToggle(),
         const SizedBox(width: 8),

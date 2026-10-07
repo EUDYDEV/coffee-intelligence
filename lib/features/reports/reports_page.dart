@@ -144,7 +144,7 @@ class _Preview extends StatelessWidget {
         Row(children: [
           const OrgLogo(height: 34, framed: false),
           const SizedBox(width: 10),
-          Text('COFFEE INTELLIGENCE', style: TS.label(p)),
+          Text(context.tr('org_name').toUpperCase(), style: TS.label(p)),
           const Spacer(),
           const DemoTag(),
         ]),

@@ -712,6 +712,7 @@ class Strings {
     'reduce_motion_d': ['Interface plus calme, utile sur les appareils modestes.', 'A calmer interface, useful on modest devices.'],
     'set_presentation_d': ['Parcours guidé pour une démonstration commerciale.', 'Guided tour for a sales demonstration.'],
     'set_intro_d': ['Revoir l’animation d’introduction.', 'Replay the introduction animation.'],
+    'org_short': ['OIAC · Plateforme café', 'IACO · Coffee platform'],
     'org_name': ['Organisation Interafricaine du Café (OIAC)', 'Inter-African Coffee Organisation (IACO)'],
     'about_demo': ['À propos de cette démo', 'About this demo'],
     'about_demo_text': [

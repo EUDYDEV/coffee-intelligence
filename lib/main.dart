@@ -30,7 +30,7 @@ class _CoffeeIntelligenceAppState extends State<CoffeeIntelligenceApp> {
       child: Builder(builder: (context) {
         final s = AppScope.of(context);
         return MaterialApp(
-          title: 'Coffee Intelligence',
+          title: 'OIAC / IACO',
           debugShowCheckedModeBanner: false,
           themeMode: s.themeMode,
           theme: buildTheme(Brightness.light),

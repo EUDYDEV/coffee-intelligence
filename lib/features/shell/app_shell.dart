@@ -260,7 +260,7 @@ class _Sidebar extends StatelessWidget {
                   ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       const OrgLogo(height: 84),
                       const SizedBox(height: 10),
-                      Text('COFFEE INTELLIGENCE', style: TextStyle(fontFamily: TS.display, color: CI.gold, fontWeight: FontWeight.w800, letterSpacing: 1.8, fontSize: 11.5)),
+                      Text(context.tr('org_name').toUpperCase(), style: TextStyle(fontFamily: TS.display, color: CI.gold, fontWeight: FontWeight.w800, letterSpacing: 1.8, fontSize: 11.5)),
                     ])
                   : const Center(child: OrgLogo(height: 40, emblem: true)),
             ),
@@ -367,7 +367,7 @@ class _MobileTop extends StatelessWidget {
       child: Row(children: [
         SecretTap(onTriple: context.app.openLogin, child: const OrgLogo(height: 30, emblem: true)),
         const SizedBox(width: 8),
-        Expanded(child: Text('COFFEE INTELLIGENCE', style: TextStyle(fontFamily: TS.display, fontWeight: FontWeight.w800, fontSize: 13, letterSpacing: 1.2, color: p.text))),
+        Expanded(child: Text(context.tr('org_short'), style: TextStyle(fontFamily: TS.display, fontWeight: FontWeight.w800, fontSize: 14, letterSpacing: 1.6, color: p.text))),
         const LangToggle(),
         const SizedBox(width: 6),
         const CurrencyPicker(compact: true),
