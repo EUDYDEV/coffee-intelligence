@@ -6,6 +6,7 @@ import '../../core/theme/palette.dart';
 import '../../data/repository.dart';
 import '../../widgets/charts.dart';
 import '../../widgets/common.dart';
+import '../../widgets/org_logo.dart';
 import '../../widgets/layout.dart';
 
 const _reports = [
@@ -141,8 +142,8 @@ class _Preview extends StatelessWidget {
       decoration: BoxDecoration(color: paper, borderRadius: BorderRadius.circular(6), border: Border.all(color: p.border), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .12), blurRadius: 18, offset: const Offset(0, 8))]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          const Icon(Icons.local_cafe_rounded, color: CI.gold, size: 18),
-          const SizedBox(width: 8),
+          const OrgLogo(height: 34, framed: false),
+          const SizedBox(width: 10),
           Text('COFFEE INTELLIGENCE', style: TS.label(p)),
           const Spacer(),
           const DemoTag(),

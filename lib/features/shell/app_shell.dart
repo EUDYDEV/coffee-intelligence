@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/palette.dart';
 import '../../data/repository.dart';
 import '../../widgets/common.dart';
+import '../../widgets/org_logo.dart';
 import '../assistant/assistant_panel.dart';
 import '../landing/landing_page.dart';
 import 'nav.dart';
@@ -234,18 +235,13 @@ class _Sidebar extends StatelessWidget {
             onTap: app.openLanding,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
-              child: Row(mainAxisAlignment: extended ? MainAxisAlignment.start : MainAxisAlignment.center, children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: CI.gold), color: CI.gold.withValues(alpha: .1)),
-                  child: const Icon(Icons.local_cafe_rounded, color: CI.gold, size: 20),
-                ),
-                if (extended) ...[
-                  const SizedBox(width: 12),
-                  const Expanded(
-                      child: Text('COFFEE\nINTELLIGENCE', style: TextStyle(fontFamily: TS.display, color: CI.cream, fontWeight: FontWeight.w800, letterSpacing: 1.4, fontSize: 13, height: 1.15))),
-                ],
-              ]),
+              child: extended
+                  ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const OrgLogo(height: 84),
+                      const SizedBox(height: 10),
+                      Text('COFFEE INTELLIGENCE', style: TextStyle(fontFamily: TS.display, color: CI.gold, fontWeight: FontWeight.w800, letterSpacing: 1.8, fontSize: 11.5)),
+                    ])
+                  : const Center(child: OrgLogo(height: 40, emblem: true)),
             ),
           ),
           Expanded(
@@ -348,7 +344,7 @@ class _MobileTop extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 12, 4),
       child: Row(children: [
-        GestureDetector(onTap: context.app.openLanding, child: const Icon(Icons.local_cafe_rounded, color: CI.gold)),
+        GestureDetector(onTap: context.app.openLanding, child: const OrgLogo(height: 30, emblem: true)),
         const SizedBox(width: 8),
         Expanded(child: Text('COFFEE INTELLIGENCE', style: TextStyle(fontFamily: TS.display, fontWeight: FontWeight.w800, fontSize: 13, letterSpacing: 1.2, color: p.text))),
         const LangToggle(),
