@@ -47,7 +47,7 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
     if (!_init) {
       _init = true;
       if (!context.calm) _amb.repeat();
-      SequenceManifest.load().then((m) {
+      SequenceManifest.load(mobile: context.isMobile).then((m) {
         if (mounted && m != null) setState(() => _seq = m);
       });
     }
@@ -216,7 +216,14 @@ class _Stage extends StatelessWidget {
     final mobile = context.isMobile;
     final plantProg = (g / .5).clamp(0.0, 1.0);
     final plantAlpha = 1 - _e(g, .5, .535);
-    final stage = plantStage(plantProg);
+    var stage = plantStage(plantProg);
+    final ch = seq?.chapters ?? const <double>[];
+    if (ch.length == 13) {
+      stage = 0;
+      for (var i = 0; i < 13; i++) {
+        if (plantProg >= ch[i]) stage = i;
+      }
+    }
 
     return Stack(children: [
       // soft light

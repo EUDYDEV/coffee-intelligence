@@ -202,7 +202,7 @@ class _Kpi extends StatelessWidget {
         Row(children: [
           if (isPct) TrendBadge(delta, invert: false) else TrendBadge(delta, invert: upIsBad),
           const SizedBox(width: 8),
-          Text(context.tr(isPct ? 'wx_vs_normal' : 'wx_vs_last_year'), style: TS.bodyS(p).copyWith(fontSize: 11)),
+          Flexible(child: Text(context.tr(isPct ? 'wx_vs_normal' : 'wx_vs_last_year'), style: TS.bodyS(p).copyWith(fontSize: 11))),
         ]),
       ]),
     );

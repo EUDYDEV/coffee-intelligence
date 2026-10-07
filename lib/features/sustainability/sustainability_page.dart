@@ -18,6 +18,7 @@ class SustainabilityPage extends StatelessWidget {
     final af = repo.countries(africaOnly: true);
     final c = repo.country(repo.country(app.selectedCountry).african ? app.selectedCountry : 'ETH');
     final b = sustainFor(c);
+    final gov = govFor(c);
     final avg = af.map(sustainFor).fold(0.0, (a, s) => a + s.overall) / af.length;
     final dims = <(String, double)>[
       ('sd_cert', b.certification),
@@ -26,6 +27,7 @@ class SustainabilityPage extends StatelessWidget {
       ('sd_forest', b.forest),
       ('sd_emissions', b.emissions),
       ('sd_coverage', b.coverage),
+      ('sd_governance', b.governance),
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       PageHeader('sustain_title', 'sustain_sub'),
@@ -55,10 +57,10 @@ class SustainabilityPage extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(context.tr('vs_avg', [Fmt.num(b.overall - avg, 1)]), style: TextStyle(color: CI.cream.withValues(alpha: .7), fontSize: 12.5)),
                 const SizedBox(height: 16),
-                Row(children: [
-                  Expanded(child: _Pillar(context.tr('social'), b.social, Icons.diversity_3_rounded)),
-                  const SizedBox(width: 10),
-                  Expanded(child: _Pillar(context.tr('environment'), b.environment, Icons.park_rounded)),
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  SizedBox(width: 150, child: _Pillar('E · ${context.tr('environment')}', b.environment, Icons.park_rounded)),
+                  SizedBox(width: 150, child: _Pillar('S · ${context.tr('social')}', b.social, Icons.diversity_3_rounded)),
+                  SizedBox(width: 150, child: _Pillar('G · ${context.tr('governance')}', b.governance, Icons.gavel_rounded)),
                 ]),
               ]),
             ),
@@ -93,6 +95,42 @@ class SustainabilityPage extends StatelessWidget {
             ),
           ),
       ]),
+      gap24,
+      Reveal(
+        child: GlassCard(
+          accent: p.gold,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            SectionLabel(context.tr('gov_title'), trailing: Chip2('G ${Fmt.num(b.governance, 0)}/100', p.gold)),
+            Text(context.tr('gov_sub', [context.tr(c.nameKey)]), style: TS.bodyS(p)),
+            const SizedBox(height: 12),
+            Grid(columns: context.cols(desktop: 4, tablet: 2, mobile: 1), gap: 12, children: [
+              for (final it in [
+                ('gov_transparency', gov.transparency, '/100'),
+                ('gov_coop', gov.coopGovernance, '/100'),
+                ('gov_compliance', gov.compliance, '/100'),
+                ('gov_audit', gov.audit, '/100'),
+                ('gov_traceability', gov.traceability, '/100'),
+                ('gov_grievance', gov.grievance, '/100'),
+                ('gov_controls', gov.controlFreq, 'gov_per_year'),
+                ('gov_audit_cov', gov.auditCoverage, '%'),
+              ])
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: p.surface2, borderRadius: BorderRadius.circular(14), border: Border.all(color: p.border)),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(context.tr(it.$1).toUpperCase(), style: TS.label(p), maxLines: 2),
+                    const SizedBox(height: 6),
+                    AnimatedCounter(it.$2, suffix: ' ${it.$3 == 'gov_per_year' ? context.tr('gov_per_year') : it.$3}', style: TS.big(p, size: 22)),
+                    const SizedBox(height: 6),
+                    if (it.$3 != 'gov_per_year') ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(value: (it.$2 / 100).clamp(0.0, 1.0), minHeight: 6, color: it.$2 > 60 ? p.green : (it.$2 > 40 ? p.gold : p.alert), backgroundColor: p.border)),
+                  ]),
+                ),
+            ]),
+            const SizedBox(height: 8),
+            Text(context.tr('gov_note'), style: TS.bodyS(p).copyWith(fontSize: 11)),
+          ]),
+        ),
+      ),
       gap24,
       Reveal(
         child: GlassCard(

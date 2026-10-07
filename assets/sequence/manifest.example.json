@@ -1,0 +1,7 @@
+{
+  "pattern": "assets/sequence/f_%04d.webp",
+  "frames": 180,
+  "aspect": 1.7778,
+  "lite": { "pattern": "assets/sequence/l_%04d.webp", "frames": 180 },
+  "chapters": [0.00, 0.05, 0.12, 0.25, 0.34, 0.42, 0.48, 0.58, 0.68, 0.74, 0.80, 0.86, 0.94]
+}

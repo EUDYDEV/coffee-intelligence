@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'app/app_state.dart';
 import 'core/theme/app_theme.dart';
 import 'features/shell/app_shell.dart';
 import 'features/shell/nav.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // ?a11y=1 keeps the accessibility (semantics) tree on: useful for screen readers and automated tests.
+  if (Uri.base.queryParameters['a11y'] == '1') SemanticsBinding.instance.ensureSemantics();
   AppState.pageIds = navItems.map((e) => e.id).toList();
   runApp(const CoffeeIntelligenceApp());
 }

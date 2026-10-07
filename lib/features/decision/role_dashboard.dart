@@ -7,6 +7,7 @@ import '../../data/demo/countries_data.dart';
 import '../../data/demo/quality_data.dart';
 import '../../data/demo/sustainability_data.dart';
 import '../../data/repository.dart';
+import '../../data/demo/stock_data.dart';
 import '../../models/models.dart';
 import '../../widgets/charts.dart';
 import '../../widgets/common.dart';
@@ -59,7 +60,7 @@ class RoleBanner extends StatelessWidget {
             Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: r.color.withValues(alpha: .2), shape: BoxShape.circle), child: Icon(r.icon, color: r.color)),
             const SizedBox(width: 12),
             ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: context.isMobile ? context.w - 100 : 520),
+              constraints: BoxConstraints(maxWidth: context.isMobile ? context.w - 130 : 520),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('${context.tr('role_profile').toUpperCase()} · ${context.tr(r.nameKey)}', style: TS.label(p).copyWith(color: r.color)),
                 const SizedBox(height: 2),
@@ -80,6 +81,7 @@ List<Widget> roleKpis(BuildContext context) {
   final spark = arab.sublist(arab.length - 12).map((e) => e.v).toList();
   final af = repo.countries(africaOnly: true);
   double avg(double Function(Country) f) => af.fold(0.0, (a, c) => a + f(c)) / af.length;
+  double stockSum(double Function(StockRow) f) => repo.stocks().fold(0.0, (a, r) => a + f(r));
   Widget k(String label, double v, String unit, IconData icon, {int d = 0, double? trend, bool inv = false, List<double>? sp, String metric = 'default'}) =>
       KpiCard(labelKey: label, metric: metric, value: v, unit: unit, decimals: d, trend: trend, invertTrend: inv, icon: icon, spark: sp);
   switch (app.role) {
@@ -102,9 +104,9 @@ List<Widget> roleKpis(BuildContext context) {
         k('kpi_price', arab.last.v, r'$/lb', Icons.show_chart_rounded, d: 2, trend: (arab.last.v / arab[arab.length - 2].v - 1) * 100, sp: spark, metric: 'price_arabica'),
         k('rk_best_diff', best / 100, r'$/lb', Icons.stacked_line_chart_rounded, d: 2, trend: 2.2),
         k('rk_freight', tc, r'$/t', Icons.local_shipping_rounded, trend: 5.4, inv: true),
-        k('rk_available', repo.africaExports(), 'kt', Icons.inventory_2_rounded, trend: -4.8, metric: 'exports'),
+        k('stk_available', stockSum((r) => r.availableKt), 'kt', Icons.warehouse_rounded, d: 1, trend: -2.4),
+        k('stk_transit', stockSum((r) => r.transitKt), 'kt', Icons.directions_boat_rounded, d: 1, trend: 3.2),
         k('rk_port_delay', port.delayDays + 4, 'j', Icons.anchor_rounded, trend: 12.0, inv: true),
-        k('kpi_forecast', repo.forecast('price').forecast.last.v, r'$/lb', Icons.query_stats_rounded, d: 2, trend: 8.7),
       ];
     case 'roaster':
       final bestQ = af.map((c) => qualityFor(c.id).score).reduce((a, b) => a > b ? a : b);
@@ -112,7 +114,7 @@ List<Widget> roleKpis(BuildContext context) {
       return [
         k('rk_best_quality', bestQ, '/100', Icons.workspace_premium_rounded, d: 1, trend: 0.8),
         k('kpi_price', arab.last.v, r'$/lb', Icons.show_chart_rounded, d: 2, trend: (arab.last.v / arab[arab.length - 2].v - 1) * 100, sp: spark, metric: 'price_arabica'),
-        k('rk_available', repo.africaExports(), 'kt', Icons.inventory_2_rounded, trend: -4.8, metric: 'exports'),
+        k('stk_available', stockSum((r) => r.availableKt), 'kt', Icons.warehouse_rounded, d: 1, trend: -2.4),
         k('rk_certified', avg((c) => c.certPct), '%', Icons.verified_rounded, trend: 1.6),
         k('rk_traced', delivered / demoLots.length * 100, '%', Icons.route_rounded, trend: 6.0),
         k('rk_supply_risk', repo.chain().fold(0.0, (a, s) => a + s.risk) / repo.chain().length, '/100', Icons.warning_amber_rounded, trend: 3.0, inv: true),
@@ -186,7 +188,7 @@ class RolePanel extends StatelessWidget {
         );
       case 'exporter':
         final tc = repo.transportCosts();
-        return TwoCol(
+        final two = TwoCol(
           left: GlassCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('rp_freight_ports')),
@@ -202,9 +204,10 @@ class RolePanel extends StatelessWidget {
             ]),
           ),
         );
+        return Column(children: [two, gap24, const StockCard()]);
       case 'roaster':
         final ranking = [...repo.countries()]..sort((a, b) => qualityFor(b.id).score.compareTo(qualityFor(a.id).score));
-        return TwoCol(
+        final two = TwoCol(
           flexL: 6,
           flexR: 4,
           left: GlassCard(
@@ -216,7 +219,7 @@ class RolePanel extends StatelessWidget {
           right: GlassCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('rp_availability')),
-              for (final c in af.take(6)) Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [SizedBox(width: 90, child: Text('${c.flag} ${c.id}', style: TS.h3(p).copyWith(fontSize: 13))), Expanded(child: Text('${Fmt.num(c.exportsKt, 0)} kt · ${Fmt.num(c.certPct, 0)} % ${context.tr('certified')}', style: TS.bodyS(p)))])),
+              for (final c in af.take(6)) Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [SizedBox(width: 90, child: Text('${c.flag} ${c.id}', style: TS.h3(p).copyWith(fontSize: 13))), Expanded(child: Text('${context.tr('stk_available')} ${Fmt.num(repo.stocks().firstWhere((x) => x.country == c.id).availableKt, 1)} kt · ${context.tr('stk_transit')} ${Fmt.num(repo.stocks().firstWhere((x) => x.country == c.id).transitKt, 1)} kt', style: TS.bodyS(p)))])),
               const SizedBox(height: 8),
               PrimaryButton(context.tr('rp_open_lots'), icon: Icons.route_rounded, outlined: true, onTap: () {
                 app.setChainTab('lots');
@@ -225,6 +228,7 @@ class RolePanel extends StatelessWidget {
             ]),
           ),
         );
+        return Column(children: [two, gap24, const StockCard()]);
       case 'ngo':
         final z = [...af]..sort((a, b) => (b.climateRisk + b.deforestRisk).compareTo(a.climateRisk + a.deforestRisk));
         return TwoCol(
@@ -288,3 +292,48 @@ class RolePanel extends StatelessWidget {
   }
 }
 
+
+
+/// Stock, reserved stock, volume in transit and exported volume are four different things.
+class StockCard extends StatelessWidget {
+  const StockCard({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal;
+    final rows = repo.stocks();
+    return GlassCard(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        SectionLabel(context.tr('stk_title')),
+        Text(context.tr('stk_sub'), style: TS.bodyS(p)),
+        const SizedBox(height: 10),
+        Wrap(spacing: 14, children: [
+          LegendDot(p.green, context.tr('stk_available')),
+          LegendDot(p.gold, context.tr('stk_reserved')),
+          LegendDot(p.accent, context.tr('stk_transit')),
+          LegendDot(p.muted, context.tr('stk_exported')),
+        ]),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            columnSpacing: 24,
+            headingTextStyle: TS.label(p),
+            columns: [for (final k in ['col_country', 'stk_available', 'stk_reserved', 'stk_transit', 'stk_exported', 'stk_capacity']) DataColumn(label: Text(context.tr(k).toUpperCase()), numeric: k != 'col_country')],
+            rows: [
+              for (final r in rows)
+                DataRow(cells: [
+                  DataCell(Text(context.tr('c_${r.country}'), style: TextStyle(color: p.text, fontWeight: FontWeight.w600))),
+                  DataCell(Text('${Fmt.num(r.availableKt, 1)} kt', style: TextStyle(color: p.green, fontWeight: FontWeight.w700))),
+                  DataCell(Text('${Fmt.num(r.reservedKt, 1)} kt', style: TextStyle(color: p.gold, fontWeight: FontWeight.w700))),
+                  DataCell(Text('${Fmt.num(r.transitKt, 1)} kt', style: TextStyle(color: p.accent, fontWeight: FontWeight.w700))),
+                  DataCell(Text('${Fmt.num(r.exportedKt, 0)} kt/${context.tr('y')}', style: TextStyle(color: p.muted))),
+                  DataCell(Text('${Fmt.num(r.capacityFreeKt, 1)} kt', style: TextStyle(color: p.text))),
+                ]),
+            ],
+          ),
+        ),
+        Text(context.tr('stk_note'), style: TS.bodyS(p).copyWith(fontSize: 11)),
+      ]),
+    );
+  }
+}

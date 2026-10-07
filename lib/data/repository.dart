@@ -5,6 +5,7 @@ import 'demo/forecast_data.dart';
 import 'demo/market_data.dart';
 import 'demo/production_data.dart' as prod;
 import 'demo/sources_data.dart';
+import 'demo/stock_data.dart';
 import 'demo/supply_chain_data.dart';
 
 /// Single access point for the UI. Replace [DemoRepository] by an API-backed
@@ -30,6 +31,7 @@ abstract class CoffeeRepository {
   List<double> africaProdHistory();
   List<String> seasonLabels();
   Map<String, List<double>> risks();
+  List<StockRow> stocks();
 }
 
 class DemoRepository implements CoffeeRepository {
@@ -75,6 +77,8 @@ class DemoRepository implements CoffeeRepository {
   List<String> seasonLabels() => prod.seasonLabels();
   @override
   Map<String, List<double>> risks() => riskAxes;
+  @override
+  List<StockRow> stocks() => stockRows();
 }
 
 final _daily = dailyArabica();

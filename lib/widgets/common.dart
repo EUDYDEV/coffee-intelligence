@@ -223,11 +223,8 @@ class PageHeader extends StatelessWidget {
     final exp = !context.app.adminView && id != null && AppState.exportable.contains(id) ? ExportButton(pageId: id) : null;
     final trailing = (exp == null) ? this.trailing : (this.trailing == null ? exp : Wrap(spacing: 10, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [this.trailing!, exp]));
     final title = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        Flexible(
-            child: Text(context.tr(titleKey),
-                style: TS.h1(p).copyWith(fontSize: context.isMobile ? 26 : 34))),
-        const SizedBox(width: 12),
+      Wrap(spacing: 12, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
+        Text(context.tr(titleKey), style: TS.h1(p).copyWith(fontSize: context.isMobile ? 26 : 34)),
         const DemoTag(),
       ]),
       const SizedBox(height: 6),
@@ -235,7 +232,7 @@ class PageHeader extends StatelessWidget {
     ]);
     return Padding(
       padding: const EdgeInsets.only(bottom: 22),
-      child: context.isMobile || trailing == null
+      child: context.w < 1000 || trailing == null
           ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               title,
               if (trailing != null) ...[const SizedBox(height: 12), trailing!]
@@ -281,8 +278,8 @@ class Segmented<T> extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-          color: p.surface2, borderRadius: BorderRadius.circular(30), border: Border.all(color: p.border)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
+          color: p.surface2, borderRadius: BorderRadius.circular(22), border: Border.all(color: p.border)),
+      child: Wrap(runSpacing: 2, children: [
         for (final v in values)
           GestureDetector(
             onTap: () => onChanged(v),
@@ -332,11 +329,14 @@ class PrimaryButton extends StatelessWidget {
           ),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             if (icon != null) ...[Icon(icon, size: 17, color: outlined ? p.gold : Colors.white), const SizedBox(width: 8)],
-            Text(text,
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13.5,
-                    color: outlined ? p.gold : Colors.white)),
+            Flexible(
+              child: Text(text,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.5,
+                      color: outlined ? p.gold : Colors.white)),
+            ),
           ]),
         ),
       ),
@@ -558,6 +558,7 @@ class _TrustBody extends StatelessWidget {
         Text(label, style: TS.bodyS(p).copyWith(fontSize: 14)),
         const SizedBox(height: 14),
         row('trust_source', context.tr(prov.sourceKey)),
+        row('trust_planned', context.tr('sp_${prov.sourceKey.substring(2)}')),
         row('trust_collected', '${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year} ${prov.received}'),
         row('trust_updated', context.tr('ago', [prov.updatedAgo])),
         row('trust_quality', '${Fmt.pct(prov.quality, 0)} · ${context.tr(prov.quality >= 90 ? 'q_high' : (prov.quality >= 75 ? 'q_medium' : 'q_low'))}'),

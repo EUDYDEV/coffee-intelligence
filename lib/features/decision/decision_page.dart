@@ -41,7 +41,7 @@ class DecisionPage extends StatelessWidget {
           children: [for (var i = 0; i < ks.length; i++) Reveal(delay: 100 + i * 60, child: ks[i])],
         );
       }),
-      Padding(padding: const EdgeInsets.only(top: 6), child: Row(children: [Icon(Icons.open_with_rounded, size: 14, color: context.pal.muted), const SizedBox(width: 6), Text(context.tr('drag_hint'), style: TS.bodyS(context.pal).copyWith(fontSize: 11))])),
+      Padding(padding: const EdgeInsets.only(top: 6), child: Row(children: [Icon(Icons.open_with_rounded, size: 14, color: context.pal.muted), const SizedBox(width: 6), Expanded(child: Text(context.tr('drag_hint'), style: TS.bodyS(context.pal).copyWith(fontSize: 11)))])),
       gap24,
       const RolePanel(),
       gap24,
@@ -297,11 +297,12 @@ class _ArrivalIntro extends StatefulWidget {
 }
 
 class _ArrivalIntroState extends State<_ArrivalIntro> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 5200));
+  late final AnimationController _c; // created in initState (a lazy init would first run inside dispose)
   late bool _show = !_introSeen;
   @override
   void initState() {
     super.initState();
+    _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 5200));
     _introSeen = true;
     if (_show) {
       _c.forward().then((_) {

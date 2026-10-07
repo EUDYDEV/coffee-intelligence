@@ -141,6 +141,7 @@ class _SourceRow extends StatelessWidget {
           Row(children: [Expanded(child: Text(context.tr(s.nameKey), style: TS.h3(p))), stateChip]),
           const SizedBox(height: 4),
           Text('${context.tr(s.dataKey)} · ${context.tr(s.freqKey)} · $updated', style: TS.bodyS(p)),
+          Text('${context.tr('sp_planned')} : ${context.tr('sp_${s.id}')} — ${context.tr('sp_status')}', style: TS.bodyS(p).copyWith(fontSize: 11, color: p.gold)),
           const SizedBox(height: 8),
           quality,
           const SizedBox(height: 8),
@@ -153,7 +154,7 @@ class _SourceRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       decoration: BoxDecoration(border: Border(top: BorderSide(color: p.border.withValues(alpha: .6)))),
       child: Row(children: [
-        Expanded(flex: 3, child: Text(context.tr(s.nameKey), style: TS.h3(p))),
+        Expanded(flex: 3, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(context.tr(s.nameKey), style: TS.h3(p)), const SizedBox(height: 2), Text('${context.tr('sp_planned')} : ${context.tr('sp_${s.id}')}', style: TS.bodyS(p).copyWith(fontSize: 10.5)), Text(context.tr('sp_status'), style: TS.bodyS(p).copyWith(fontSize: 10.5, color: p.gold, fontWeight: FontWeight.w700))])),
         Expanded(flex: 2, child: Text(context.tr(s.dataKey), style: TS.bodyS(p).copyWith(fontSize: 13))),
         Expanded(flex: 2, child: Text(context.tr(s.freqKey), style: TS.bodyS(p).copyWith(fontSize: 13))),
         Expanded(flex: 2, child: Text(updated, style: TS.bodyS(p).copyWith(fontSize: 13))),

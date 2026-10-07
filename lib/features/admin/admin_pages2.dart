@@ -278,7 +278,7 @@ class _AdminSourcesPageState extends State<AdminSourcesPage> {
                     final s = src.firstWhere((x) => x.id == o.id);
                     final busy = _syncing.contains(o.id);
                     return DataRow(cells: [
-                      DataCell(Text(context.tr(s.nameKey), style: TS.h3(p).copyWith(fontSize: 13.5))),
+                      DataCell(Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [Text(context.tr(s.nameKey), style: TS.h3(p).copyWith(fontSize: 13.5)), Text('${context.tr('sp_planned')} : ${context.tr('sp_${s.id}')}', style: TS.bodyS(p).copyWith(fontSize: 10.5))])),
                       DataCell(Text(context.tr(s.dataKey), style: TextStyle(color: p.text, fontSize: 13))),
                       DataCell(Chip2(context.tr(['adm_ss_active', 'adm_ss_attention', 'adm_ss_error', 'adm_ss_suspended'][o.status]), cols[o.status], icon: _srcStatus[o.status])),
                       DataCell(Text(context.tr(s.freqKey), style: TextStyle(color: p.text, fontSize: 13))),

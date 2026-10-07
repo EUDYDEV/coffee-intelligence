@@ -46,8 +46,9 @@ List<DataSet> buildDatasets() => [
       DataSet('costs', 'dset_costs', 'dset_costs_d', 'survey', ['col_country', 'col_farmgate', 'col_cost', 'col_margin', 'col_income'], 1200),
       DataSet('coops', 'dset_coops', 'dset_coops_d', 'coops', ['col_coop', 'col_country', 'col_tonnes', 'col_port'], 900),
       DataSet('ports', 'dset_ports', 'dset_ports_d', 'ports', ['col_port', 'col_country', 'col_transport'], 600),
-      DataSet('sustain', 'dset_sustain', 'dset_sustain_d', 'certs', ['col_country', 'col_cert', 'col_forest', 'col_social', 'col_env', 'col_index'], 1500),
+      DataSet('sustain', 'dset_sustain', 'dset_sustain_d', 'certs', ['col_country', 'col_cert', 'col_forest', 'col_social', 'col_env', 'col_gov', 'col_index'], 1500),
       DataSet('climate', 'dset_climate', 'dset_climate_d', 'weather', ['col_month', 'col_rain', 'col_delay'], 700, forSale: false),
+      DataSet('stocks', 'dset_stocks', 'dset_stocks_d', 'ports', ['col_country', 'stk_exported', 'stk_available', 'stk_reserved', 'stk_transit', 'stk_capacity'], 950),
       DataSet('chain', 'dset_chain', 'dset_chain_d', 'ports', ['col_step', 'col_kt', 'col_days', 'col_risk'], 800),
       DataSet('forecast', 'dset_forecast', 'dset_forecast_d', 'markets', ['col_month', 'col_predicted', 'col_low', 'col_high'], 2200, license: 'lic_premium'),
       DataSet('anomalies', 'dset_anomalies', 'dset_anomalies_d', 'markets', ['col_anomaly', 'col_severity', 'col_country', 'col_value'], 500, forSale: false),
@@ -89,12 +90,14 @@ List<List<String>> datasetRows(String id, String Function(String) t) {
         for (final c in repo.countries(africaOnly: true))
           () {
             final b = sustainFor(c);
-            return [t(c.nameKey), Fmt.num(c.certPct, 0), Fmt.num(b.forest, 0), Fmt.num(b.social, 0), Fmt.num(b.environment, 0), Fmt.num(b.overall, 0)];
+            return [t(c.nameKey), Fmt.num(c.certPct, 0), Fmt.num(b.forest, 0), Fmt.num(b.social, 0), Fmt.num(b.environment, 0), Fmt.num(b.governance, 0), Fmt.num(b.overall, 0)];
           }()
       ];
     case 'climate':
       final rain = rainCivSeries, delay = delayTzaSeries;
       return [for (var i = 0; i < rain.length; i++) [_ym(rain[i].t), Fmt.num(rain[i].v, 0), Fmt.num(delay[i].v, 1)]];
+    case 'stocks':
+      return [for (final s in repo.stocks()) [t('c_${s.country}'), Fmt.num(s.exportedKt, 0), Fmt.num(s.availableKt, 1), Fmt.num(s.reservedKt, 1), Fmt.num(s.transitKt, 1), Fmt.num(s.capacityFreeKt, 1)]];
     case 'chain':
       return [for (final s in repo.chain()) [t(s.nameKey), Fmt.num(s.volumeKt, 0), Fmt.num(s.delayDays, 0), Fmt.num(s.risk, 0)]];
     case 'forecast':

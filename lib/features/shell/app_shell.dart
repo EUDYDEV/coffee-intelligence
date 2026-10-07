@@ -226,11 +226,19 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-class _PageHost extends StatelessWidget {
+class _PageHost extends StatefulWidget {
   final int index;
   const _PageHost({super.key, required this.index});
   @override
+  State<_PageHost> createState() => _PageHostState();
+}
+
+class _PageHostState extends State<_PageHost> {
+  final GlobalKey _boundary = GlobalKey(); // own key: old and new hosts coexist during the page transition
+  @override
   Widget build(BuildContext context) {
+    final index = widget.index;
+    context.app.exportKey = _boundary;
     final nav = navItems[index];
     final locked = context.app.isRestricted(nav.id);
     final pad = context.isMobile ? 16.0 : (context.isTablet ? 24.0 : 32.0);
@@ -238,7 +246,7 @@ class _PageHost extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(pad, context.isMobile ? 10 : 6, pad, 120),
       child: Align(
         alignment: Alignment.topCenter,
-        child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 1360), child: locked ? RestrictedPage(pageNameKey: nav.labelKey) : RepaintBoundary(key: context.app.exportKey, child: nav.build())),
+        child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 1360), child: locked ? RestrictedPage(pageNameKey: nav.labelKey) : RepaintBoundary(key: _boundary, child: nav.build())),
       ),
     );
   }
@@ -299,7 +307,7 @@ class _Sidebar extends StatelessWidget {
             child: Column(children: [
               if (extended)
                 Column(children: [Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const LangToggle(), const ThemeToggle()]), const SizedBox(height: 8), const Align(alignment: Alignment.centerLeft, child: CurrencyPicker())])
-              else ...[const LangToggle(), const SizedBox(height: 8), const ThemeToggle(), const SizedBox(height: 8), const CurrencyPicker(compact: true)],
+              else ...[const FittedBox(fit: BoxFit.scaleDown, child: LangToggle()), const SizedBox(height: 8), const ThemeToggle(), const SizedBox(height: 8), const FittedBox(fit: BoxFit.scaleDown, child: CurrencyPicker(compact: true))],
               const SizedBox(height: 10),
               _NavTile(i: navItems.length - 1, extended: extended),
             ]),
@@ -367,15 +375,21 @@ class _DesktopTop extends StatelessWidget {
       child: Row(children: [
         Container(width: 8, height: 8, decoration: BoxDecoration(color: p.green, shape: BoxShape.circle, boxShadow: [BoxShadow(color: p.green, blurRadius: 8)])),
         const SizedBox(width: 8),
-        Text(context.tr('live_demo'), style: TS.label(p)),
-        const Spacer(),
-        Text('${context.tr('role_profile')} : ', style: TS.bodyS(p)),
-        Text(context.tr(app.roleDef.nameKey), style: TS.h3(p).copyWith(color: app.roleDef.color)),
+        Expanded(child: Text(context.tr('live_demo'), maxLines: 2, overflow: TextOverflow.ellipsis, style: TS.label(p))),
+        const SizedBox(width: 12),
+        if (context.w > 1000) Text('${context.tr('role_profile')} : ', style: TS.bodyS(p)),
+        if (context.w > 1000) Text(context.tr(app.roleDef.nameKey), style: TS.h3(p).copyWith(color: app.roleDef.color)),
         const SizedBox(width: 14),
-        PrimaryButton(app.presentation ? context.tr('exit_presentation') : context.tr('presentation_mode'),
-            icon: app.presentation ? Icons.close_rounded : Icons.slideshow_rounded, outlined: true, onTap: () {
-          app.setPresentation(!app.presentation);
-        }),
+        if (context.w > 1000)
+          PrimaryButton(app.presentation ? context.tr('exit_presentation') : context.tr('presentation_mode'),
+              icon: app.presentation ? Icons.close_rounded : Icons.slideshow_rounded, outlined: true, onTap: () {
+            app.setPresentation(!app.presentation);
+          })
+        else
+          IconButton(
+              tooltip: context.tr('presentation_mode'),
+              onPressed: () => app.setPresentation(!app.presentation),
+              icon: Icon(app.presentation ? Icons.close_rounded : Icons.slideshow_rounded, color: p.gold)),
         const SizedBox(width: 10),
         PrimaryButton(context.tr('assistant_name'), icon: Icons.auto_awesome_rounded, onTap: onAssist),
       ]),

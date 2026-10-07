@@ -72,6 +72,7 @@ class _AlertsPageState extends State<AlertsPage> {
         Text(context.tr('alert_notify_me', [Fmt.usd(3.5)]), style: TS.bodyS(p)),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: _metric,
           decoration: InputDecoration(labelText: context.tr('metric'), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
           items: [

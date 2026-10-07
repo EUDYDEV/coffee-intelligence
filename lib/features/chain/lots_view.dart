@@ -81,7 +81,8 @@ class _LotsViewState extends State<LotsView> {
           Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: p.accent.withValues(alpha: .13), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.qr_code_2_rounded, color: p.accent, size: 28)),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('${context.tr('lot_word')} ${lot.id}', style: TS.h2(p)), Text('${coop.name} · ${country.flag} ${context.tr(country.nameKey)}', style: TS.bodyS(p))])),
-          Chip2(context.tr(lot.statusKey), lot.progress >= 10 ? p.green : p.gold, icon: Icons.circle),
+          const SizedBox(width: 8),
+          Flexible(child: Chip2(context.tr(lot.statusKey), lot.progress >= 10 ? p.green : p.gold, icon: Icons.circle)),
         ]),
         const SizedBox(height: 14),
         Wrap(spacing: 26, runSpacing: 12, children: [

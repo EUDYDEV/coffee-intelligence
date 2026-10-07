@@ -22,7 +22,7 @@ class AppState extends ChangeNotifier {
   String selectedCountry = 'ETH';
   final List<UserAlert> userAlerts = [];
 
-  final GlobalKey exportKey = GlobalKey(); // page content captured for PNG export
+  GlobalKey exportKey = GlobalKey(); // page content captured for PNG export
 
   // ---- simulated profile (role) ----
   String role = 'board';
