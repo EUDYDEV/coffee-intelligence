@@ -129,6 +129,7 @@ class _AnomaliesPageState extends State<AnomaliesPage> {
               Text(context.tr(a.descKey), style: TS.bodyS(p).copyWith(fontSize: 14)),
               const SizedBox(height: 14),
               LineChartW(
+                sourceId: {'arabica': 'markets', 'rain_civ': 'weather', 'exports_ken': 'customs', 'yield_uga': 'production', 'prod_eth': 'production', 'delay_tza': 'ports'}[a.series], unit: a.series == 'arabica' ? Fmt.unit(r'$/lb') : unit,
                 height: context.isMobile ? 230 : 290,
                 dates: s.map((e) => e.t).toList(),
                 series: [ChartSeries(context.tr('observed'), s.map((e) => e.v).toList(), p.accent)],

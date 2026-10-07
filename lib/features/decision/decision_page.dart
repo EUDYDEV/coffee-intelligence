@@ -73,6 +73,7 @@ class DecisionPage extends StatelessWidget {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('price_evolution')),
               LineChartW(
+                sourceId: 'markets', unit: Fmt.unit(r'$/lb'),
                 height: 250,
                 dates: arab.map((e) => e.t).toList(),
                 series: [ChartSeries('Arabica', arab.map((e) => e.v).toList(), p.accent), ChartSeries('Robusta', repo.series('robusta').map((e) => e.v).toList(), p.green, fill: false)],

@@ -162,7 +162,8 @@ class _Preview extends StatelessWidget {
           Expanded(child: _K(context.tr('kpi_income'), Fmt.usd(repo.africaIncome(), 0), p)),
         ]),
         const SizedBox(height: 14),
-        BarChartW(height: 170, fmt: (v) => Fmt.num(v, 0), items: [for (final c in af) BarItem(c.id, c.prodKt, p.accent)]),
+        BarChartW(
+                sourceId: 'production', unit: 'kt',height: 170, fmt: (v) => Fmt.num(v, 0), items: [for (final c in af) BarItem(c.id, c.prodKt, p.accent)]),
         const SizedBox(height: 14),
         Wrap(spacing: 10, runSpacing: 10, children: [
           PrimaryButton(context.tr('download_pdf'), icon: Icons.download_rounded, onTap: () {

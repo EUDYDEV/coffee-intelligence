@@ -4,6 +4,7 @@ import '../core/ctx.dart';
 import '../core/format.dart';
 import '../core/theme/app_theme.dart';
 import '../core/theme/palette.dart';
+import '../data/repository.dart';
 
 class ChartSeries {
   final String name;
@@ -26,6 +27,8 @@ class LineChartW extends StatefulWidget {
   final int? forecastFrom; // index where forecast starts (draws a divider)
   final String Function(double) yFmt;
   final Color? highlightColor;
+  final String? sourceId; // data source shown under the chart
+  final String? unit;
   const LineChartW({
     super.key,
     required this.series,
@@ -38,6 +41,8 @@ class LineChartW extends StatefulWidget {
     this.forecastFrom,
     this.yFmt = _def,
     this.highlightColor,
+    this.sourceId,
+    this.unit,
   });
   static String _def(double v) => Fmt.num(v, v.abs() < 10 ? 2 : 0);
   @override
@@ -107,6 +112,18 @@ class _LineChartWState extends State<LineChartW> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final legend = <(Color, String)>[
+      if (widget.series.length > 1 || widget.lower != null) for (final s in widget.series) (s.color, s.name),
+      if (widget.lower != null) (context.pal.gold.withValues(alpha: .5), context.tr('fc_range')),
+      if (widget.highlight != null) (widget.highlightColor ?? context.pal.alert, context.tr('legend_anomaly')),
+    ];
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _chart(context),
+      ChartFooter(sourceId: widget.sourceId, legend: legend, unit: widget.unit),
+    ]);
+  }
+
+  Widget _chart(BuildContext context) {
     final p = context.pal;
     return SizedBox(
       height: widget.height,
@@ -365,6 +382,9 @@ class BarChartW extends StatefulWidget {
   final ValueChanged<int>? onTap;
   final String Function(double) fmt;
   final bool showValues;
+  final String? sourceId;
+  final String? unit;
+  final List<(Color, String)> legend;
   const BarChartW({
     super.key,
     required this.items,
@@ -373,6 +393,9 @@ class BarChartW extends StatefulWidget {
     this.onTap,
     this.fmt = _f,
     this.showValues = true,
+    this.sourceId,
+    this.unit,
+    this.legend = const [],
   });
   static String _f(double v) => Fmt.num(v, v.abs() < 10 ? 1 : 0);
   @override
@@ -404,7 +427,12 @@ class _BarChartWState extends State<BarChartW> with SingleTickerProviderStateMix
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _chart(context),
+        ChartFooter(sourceId: widget.sourceId, legend: widget.legend, unit: widget.unit),
+      ]);
+
+  Widget _chart(BuildContext context) {
     final p = context.pal;
     return SizedBox(
       height: widget.height,
@@ -749,4 +777,39 @@ class LegendDot extends StatelessWidget {
         Text(text, style: TS.bodyS(context.pal).copyWith(fontSize: 12)),
         const SizedBox(width: 14),
       ]);
+}
+
+
+/// Under every chart: legend, unit and where the data comes from.
+class ChartFooter extends StatelessWidget {
+  final String? sourceId;
+  final List<(Color, String)> legend;
+  final String? unit;
+  const ChartFooter({super.key, this.sourceId, this.legend = const [], this.unit});
+  @override
+  Widget build(BuildContext context) {
+    if (sourceId == null && legend.isEmpty && unit == null) return const SizedBox();
+    final p = context.pal;
+    final src = sourceId == null ? null : repo.sources().where((s) => s.id == sourceId).firstOrNull;
+    final style = TS.bodyS(p).copyWith(fontSize: 11);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (legend.isNotEmpty || unit != null)
+          Wrap(crossAxisAlignment: WrapCrossAlignment.center, children: [
+            for (final l in legend) LegendDot(l.$1, l.$2),
+            if (unit != null) Text('${context.tr('legend_unit')} : $unit', style: style),
+          ]),
+        if (src != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Row(children: [
+              Icon(Icons.hub_outlined, size: 12, color: p.muted),
+              const SizedBox(width: 5),
+              Expanded(child: Text(context.tr('chart_source', [context.tr(src.nameKey), context.tr('ago', [src.updated]), Fmt.num(src.quality, 0)]), style: style)),
+            ]),
+          ),
+      ]),
+    );
+  }
 }

@@ -102,6 +102,7 @@ class _ComparePageState extends State<ComparePage> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('cmp_evolution')),
               LineChartW(
+                sourceId: 'production', unit: 'index',
                 height: 260,
                 dates: [for (var i = 0; i < 8; i++) DateTime(2019 + i, 7, 1)],
                 yFmt: (v) => Fmt.num(v, 0),
@@ -117,7 +118,8 @@ class _ComparePageState extends State<ComparePage> {
         GlassCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             SectionLabel(context.tr('cmp_region_vol')),
-            BarChartW(height: 300, fmt: (v) => Fmt.num(v, 1), items: [
+            BarChartW(
+                sourceId: 'production', unit: 'kt',height: 300, fmt: (v) => Fmt.num(v, 1), items: [
               for (var i = 0; i < cs.length; i++)
                 for (final r in cs[i].regions) BarItem(r.name, cs[i].prodKt * r.share, col(i)),
             ]),
@@ -129,7 +131,8 @@ class _ComparePageState extends State<ComparePage> {
         GlassCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             SectionLabel(context.tr('cmp_coop_vol')),
-            BarChartW(height: 320, fmt: (v) => Fmt.num(v, 0), items: [
+            BarChartW(
+                sourceId: 'coops', unit: 't',height: 320, fmt: (v) => Fmt.num(v, 0), items: [
               for (final k in repo.coops()) BarItem(k.name.split(' ').first, k.volumeT, [p.accent, p.green, p.gold, const Color(0xFF8B5A7C), const Color(0xFF4F7F93), p.warn][repo.countries(africaOnly: true).indexWhere((c) => c.id == k.country)]),
             ]),
             Text(context.tr('cmp_coop_note'), style: TS.bodyS(p)),

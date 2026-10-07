@@ -70,6 +70,7 @@ class _ChainPageState extends State<ChainPage> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('volume_through_chain')),
               BarChartW(
+                sourceId: 'ports', unit: 'kt', legend: [(p.green, context.tr('status_ok')), (p.gold, context.tr('status_attention')), (p.alert, context.tr('status_risk'))],
                 height: 260,
                 selected: steps.indexWhere((e) => e.id == _sel),
                 onTap: (i) => setState(() => _sel = steps[i].id),

@@ -66,3 +66,8 @@ Tous les textes sont dans `lib/core/i18n/strings.dart` (`clé: [fr, en]`). Utili
 ## Ce qui est réel / simulé
 **Réel** : navigation, responsive, langue, thème, filtres, graphiques, carte, simulateur (calculs locaux), alertes, comparaisons, anomalies, sources, parcours du café.
 **Simulé** : récupération des données externes, météo/marchés en direct, IA de l'assistant (réponses à partir des données de démo uniquement), génération PDF, notifications, authentification.
+
+## Espace administrateur (démo front-end)
+Taper **3 fois de suite sur le logo** (barre latérale, entête mobile ou accueil) ouvre la page de connexion.
+Identifiants de démonstration : `admin` / `coffee2026` (vérifiés localement : aucune sécurité réelle, code visible dans le dépôt).
+Pages : tableau de bord admin, toutes les données (tableaux, recherche, copie CSV), vente de données (mise en vente, prix, ventes simulées), ajout manuel et import CSV.

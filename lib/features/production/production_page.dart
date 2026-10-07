@@ -59,6 +59,7 @@ class _ProductionPageState extends State<ProductionPage> {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             SectionLabel(context.tr('prod_by_country'), trailing: Segmented<bool>(values: const [true, false], selected: _africaOnly, label: (v) => v ? context.tr('africa') : context.tr('world'), onChanged: (v) => setState(() => _africaOnly = v))),
             BarChartW(
+                sourceId: 'production', unit: 'kt', legend: [(p.accent, context.tr('africa')), (p.muted, context.tr('world'))],
               height: 260,
               fmt: (v) => Fmt.num(v, 0),
               selected: list.indexWhere((x) => x.id == c.id),
@@ -76,7 +77,8 @@ class _ProductionPageState extends State<ProductionPage> {
           child: GlassCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('yield_by_country')),
-              BarChartW(height: 230, fmt: (v) => Fmt.num(v, 0), items: [for (final x in [...af]..sort((a, b) => b.yieldKgHa.compareTo(a.yieldKgHa))) BarItem(x.id, x.yieldKgHa, p.green)]),
+              BarChartW(
+                sourceId: 'production', unit: 'kg/ha',height: 230, fmt: (v) => Fmt.num(v, 0), items: [for (final x in [...af]..sort((a, b) => b.yieldKgHa.compareTo(a.yieldKgHa))) BarItem(x.id, x.yieldKgHa, p.green)]),
             ]),
           ),
         ),
@@ -85,6 +87,7 @@ class _ProductionPageState extends State<ProductionPage> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('annual_evolution')),
               LineChartW(
+                sourceId: 'production', unit: 'kt',
                 height: 230,
                 dates: [for (var i = 0; i < 8; i++) DateTime(2019 + i, 7, 1)],
                 series: [ChartSeries(context.tr('africa'), repo.africaProdHistory(), p.accent)],

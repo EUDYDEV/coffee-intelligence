@@ -50,7 +50,8 @@ class RevenuePage extends StatelessWidget {
             SectionLabel(context.tr('waterfall_title')),
             Text(context.tr('waterfall_sub'), style: TS.bodyS(p)),
             const SizedBox(height: 10),
-            BarChartW(height: 280, fmt: (v) => Fmt.usd(v.abs()), items: [
+            BarChartW(
+                sourceId: 'survey', unit: Fmt.unit(r'$/kg'), legend: [(p.gold, context.tr('wf_export')), (p.alert, context.tr('wf_logistics')), (p.accent, context.tr('wf_farmgate')), (p.warn, context.tr('wf_cost')), (p.green, context.tr('wf_margin'))],height: 280, fmt: (v) => Fmt.usd(v.abs()), items: [
               BarItem(context.tr('wf_export'), price, p.gold),
               BarItem(context.tr('wf_logistics'), price - logistics, p.alert, from: price),
               BarItem(context.tr('wf_farmgate'), c.farmgateKg, p.accent),
@@ -66,7 +67,8 @@ class RevenuePage extends StatelessWidget {
           child: GlassCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('zone_compare_margin')),
-              BarChartW(height: 230, fmt: (v) => Fmt.money(v, 2), selected: af.indexWhere((x) => x.id == c.id), onTap: (i) => app.selectCountry(af[i].id), items: [for (final x in af) BarItem(x.id, x.margin, x.margin > .7 ? p.green : p.warn)]),
+              BarChartW(
+                sourceId: 'survey', unit: Fmt.unit(r'$/kg'),height: 230, fmt: (v) => Fmt.money(v, 2), selected: af.indexWhere((x) => x.id == c.id), onTap: (i) => app.selectCountry(af[i].id), items: [for (final x in af) BarItem(x.id, x.margin, x.margin > .7 ? p.green : p.warn)]),
             ]),
           ),
         ),

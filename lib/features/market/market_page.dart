@@ -50,7 +50,8 @@ class _MarketPageState extends State<MarketPage> {
               FilterChip(label: const Text('Arabica'), selected: _arab, onSelected: (v) => setState(() => _arab = v), selectedColor: p.accent.withValues(alpha: .25), showCheckmark: false),
               FilterChip(label: const Text('Robusta'), selected: _rob, onSelected: (v) => setState(() => _rob = v), selectedColor: p.green.withValues(alpha: .25), showCheckmark: false),
             ])),
-            LineChartW(height: context.isMobile ? 240 : 330, dates: aa.map((e) => e.t).toList(), series: series, yFmt: (v) => Fmt.usd(v), highlight: _months == 36 && _arab ? 27 : null),
+            LineChartW(
+                sourceId: 'markets', unit: Fmt.unit(r'$/lb'),height: context.isMobile ? 240 : 330, dates: aa.map((e) => e.t).toList(), series: series, yFmt: (v) => Fmt.usd(v), highlight: _months == 36 && _arab ? 27 : null),
             if (_months == 36 && _arab)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -67,6 +68,7 @@ class _MarketPageState extends State<MarketPage> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('origin_prices')),
               BarChartW(
+                sourceId: 'markets', unit: Fmt.unit(r'$/lb'), legend: [(p.accent, context.tr('africa')), (p.muted, context.tr('world'))],
                 height: 260,
                 selected: _selOrigin,
                 onTap: (i) => setState(() => _selOrigin = i),
@@ -115,7 +117,8 @@ class _MarketPageState extends State<MarketPage> {
         child: GlassCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             SectionLabel(context.tr('transport_costs')),
-            BarChartW(height: 200, fmt: (v) => Fmt.usd(v, 0), items: [
+            BarChartW(
+                sourceId: 'ports', unit: '${Fmt.sym}/t',height: 200, fmt: (v) => Fmt.usd(v, 0), items: [
               for (final pt in repo.ports()) BarItem(pt.name, ports[pt.id]!, p.green),
             ]),
             Text(context.tr('transport_note'), style: TS.bodyS(p)),

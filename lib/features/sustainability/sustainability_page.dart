@@ -98,7 +98,8 @@ class SustainabilityPage extends StatelessWidget {
         child: GlassCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             SectionLabel(context.tr('sustain_compare')),
-            BarChartW(height: 230, fmt: (v) => Fmt.num(v, 0), selected: af.indexWhere((x) => x.id == c.id), onTap: (i) => app.selectCountry(af[i].id), items: [for (final x in af) BarItem(x.id, sustainFor(x).overall, p.green)]),
+            BarChartW(
+                sourceId: 'certs', unit: '/100',height: 230, fmt: (v) => Fmt.num(v, 0), selected: af.indexWhere((x) => x.id == c.id), onTap: (i) => app.selectCountry(af[i].id), items: [for (final x in af) BarItem(x.id, sustainFor(x).overall, p.green)]),
             const SizedBox(height: 6),
             Wrap(children: [for (final x in af) Padding(padding: const EdgeInsets.only(right: 12), child: Text('${x.id}: ${Fmt.pct(x.certPct, 0)} ${context.tr('certified')}', style: TS.bodyS(p).copyWith(fontSize: 11.5)))]),
           ]),

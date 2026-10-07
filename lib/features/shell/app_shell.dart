@@ -7,6 +7,9 @@ import '../../data/repository.dart';
 import '../../widgets/common.dart';
 import '../../widgets/org_logo.dart';
 import '../assistant/assistant_panel.dart';
+import '../admin/admin_shell.dart';
+import '../admin/login_page.dart';
+import '../../widgets/secret_tap.dart';
 import '../landing/landing_page.dart';
 import 'nav.dart';
 import 'top_controls.dart';
@@ -74,6 +77,8 @@ class _AppShellState extends State<AppShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _syncAuto();
     });
+    if (app.showLogin) return const AdminLogin();
+    if (app.admin && app.adminView) return const AdminShell();
     if (app.showLanding) {
       return AnimatedSwitcher(duration: context.dur(500), child: const LandingPage(key: ValueKey('landing')));
     }
@@ -109,6 +114,22 @@ class _AppShellState extends State<AppShell> {
       body: Stack(children: [
         Positioned.fill(child: Container(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [p.bg, p.bg2])))),
         SafeArea(bottom: false, child: body),
+        if (app.admin && !app.adminView)
+          Positioned(
+            top: 8,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () => app.setAdminView(true),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(color: CI.alert, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .3), blurRadius: 10)]),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.admin_panel_settings_rounded, color: Colors.white, size: 16), const SizedBox(width: 6), Text(context.tr('adm_back_admin'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12))]),
+                ),
+              ),
+            ),
+          ),
         if (app.presentation)
           Positioned(
             left: 0,
@@ -231,8 +252,8 @@ class _Sidebar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Column(children: [
-          GestureDetector(
-            onTap: app.openLanding,
+          SecretTap(
+            onTriple: app.openLogin,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
               child: extended
@@ -344,7 +365,7 @@ class _MobileTop extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 12, 4),
       child: Row(children: [
-        GestureDetector(onTap: context.app.openLanding, child: const OrgLogo(height: 30, emblem: true)),
+        SecretTap(onTriple: context.app.openLogin, child: const OrgLogo(height: 30, emblem: true)),
         const SizedBox(width: 8),
         Expanded(child: Text('COFFEE INTELLIGENCE', style: TextStyle(fontFamily: TS.display, fontWeight: FontWeight.w800, fontSize: 13, letterSpacing: 1.2, color: p.text))),
         const LangToggle(),

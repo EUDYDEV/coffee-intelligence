@@ -12,6 +12,7 @@ import '../../data/repository.dart';
 import '../../widgets/chain_photo.dart';
 import '../../widgets/common.dart';
 import '../../widgets/org_logo.dart';
+import '../../widgets/secret_tap.dart';
 import '../shell/top_controls.dart';
 
 double _e(double p, double a, double b) {
@@ -136,7 +137,7 @@ class _TopBar extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: context.isMobile ? 14 : 28, vertical: 12),
       child: Row(children: [
-        GestureDetector(onTap: () {}, child: OrgLogo(height: context.isMobile ? 32 : 46, emblem: context.isMobile)),
+        SecretTap(onTriple: context.app.openLogin, child: OrgLogo(height: context.isMobile ? 32 : 46, emblem: context.isMobile)),
         const SizedBox(width: 12),
         if (!context.isMobile)
           Text('COFFEE INTELLIGENCE', style: TextStyle(fontFamily: TS.display, fontWeight: FontWeight.w700, letterSpacing: 1.6, color: p.text, fontSize: 14)),

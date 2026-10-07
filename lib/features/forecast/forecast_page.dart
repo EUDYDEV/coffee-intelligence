@@ -91,6 +91,7 @@ class _ForecastPageState extends State<ForecastPage> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('fc_chart'), trailing: Wrap(children: [LegendDot(p.accent, context.tr('fc_history')), LegendDot(p.gold, context.tr('fc_forecast'))])),
               LineChartW(
+                sourceId: {'price': 'markets', 'production': 'production', 'yield': 'production', 'climate': 'weather'}[_id], unit: _id == 'price' ? Fmt.unit(r'$/lb') : _units[_id],
                 key: ValueKey('$_id$_h'),
                 height: context.isMobile ? 280 : 380,
                 dates: dates,
