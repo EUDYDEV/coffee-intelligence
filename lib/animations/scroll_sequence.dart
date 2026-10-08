@@ -36,8 +36,7 @@ class SequenceManifest {
   }
 }
 
-/// Scroll-scrubbed cinematic player: cross-fades adjacent frames, covers the viewport,
-/// adds a slow push-in, vignette and film grain for a filmic grade.
+/// Scroll-scrubbed player: cross-fades adjacent frames and covers the viewport (no stretching, no grading of the footage).
 /// Memory: only a sliding window of frames is kept decoded (decoded at screen size, not full size).
 class ScrollSequence extends StatefulWidget {
   final SequenceManifest manifest;
@@ -108,59 +107,16 @@ class _ScrollSequenceState extends State<ScrollSequence> {
           opacity: o,
           child: Image(image: _provider(i, w), fit: BoxFit.cover, gaplessPlayback: true, filterQuality: FilterQuality.medium, errorBuilder: (_, __, ___) => const SizedBox()),
         );
-    final push = 1.0 + .06 * widget.progress;
-    final screen = MediaQuery.sizeOf(context);
-    // Portrait footage on a wide screen: keep the frame whole in a centred column on a dark backdrop
-    // (cover-fitting would zoom a 9:16 clip far too much).
-    final framed = m.aspect < screen.width / screen.height * .8;
-    final footage = Transform.scale(scale: push, child: Stack(fit: StackFit.expand, children: [img(a, 1), if (t > .02 && b != a) img(b, t)]));
+    // Full-bleed: BoxFit.cover fills the screen without stretching the footage (only the edges are cropped).
+    final footage = Stack(fit: StackFit.expand, children: [img(a, 1), if (t > .02 && b != a) img(b, t)]);
     return Stack(fit: StackFit.expand, children: [
-      if (framed) ...[
-        const DecoratedBox(
-          decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF120A07), Color(0xFF2A1812)])),
-        ),
-        Center(
-          child: SizedBox(
-            width: math.min(screen.width, screen.height * m.aspect),
-            height: screen.height,
-            child: ShaderMask(
-              blendMode: BlendMode.dstIn,
-              shaderCallback: (r) => const LinearGradient(stops: [0, .1, .9, 1], colors: [Colors.transparent, Colors.black, Colors.black, Colors.transparent]).createShader(r),
-              child: ClipRect(child: footage),
-            ),
-          ),
-        ),
-      ] else
-        footage,
-      DecoratedBox(
+      footage,
+      // light scrims only where the header / captions sit, so the footage stays bright
+      const DecoratedBox(
         decoration: BoxDecoration(
-          gradient: RadialGradient(radius: 1.05, colors: [Colors.transparent, Colors.black.withValues(alpha: .55)], stops: const [.55, 1]),
+          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, stops: [0, .22, .6, 1], colors: [Color(0x59000000), Color(0x00000000), Color(0x00000000), Color(0x73000000)]),
         ),
       ),
-      CustomPaint(painter: _GrainPainter(widget.ambient)),
     ]);
   }
-}
-
-class _GrainPainter extends CustomPainter {
-  final double t;
-  _GrainPainter(this.t);
-  @override
-  void paint(Canvas canvas, Size s) {
-    final r = math.Random((t * 24).floor());
-    final p = Paint();
-    for (var i = 0; i < 160; i++) {
-      p.color = Colors.white.withValues(alpha: .03 + r.nextDouble() * .05);
-      canvas.drawCircle(Offset(r.nextDouble() * s.width, r.nextDouble() * s.height), .6 + r.nextDouble() * .8, p);
-    }
-    final d = math.Random(7);
-    for (var i = 0; i < 18; i++) {
-      final x = (d.nextDouble() + t * (.05 + d.nextDouble() * .08)) % 1 * s.width;
-      final y = (d.nextDouble() - t * (.04 + d.nextDouble() * .06)) % 1 * s.height;
-      canvas.drawCircle(Offset(x, y), 2 + d.nextDouble() * 5, Paint()..color = const Color(0xFFFFE9B8).withValues(alpha: .05 + d.nextDouble() * .07));
-    }
-  }
-
-  @override
-  bool shouldRepaint(_GrainPainter o) => o.t != t;
 }

@@ -446,7 +446,7 @@ class _Caption extends StatelessWidget {
     final mobile = context.isMobile;
     final num = index.toString().padLeft(2, '0');
     final body = Column(crossAxisAlignment: mobile ? CrossAxisAlignment.center : CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-      Text('$num / $total', style: TextStyle(fontFamily: TS.display, fontSize: mobile ? 14 : 18, color: p.gold, letterSpacing: 3, fontWeight: FontWeight.w700)),
+      Text('$num / $total', style: TextStyle(fontFamily: TS.display, fontSize: mobile ? 14 : 18, color: p.gold, letterSpacing: 3, fontWeight: FontWeight.w700, shadows: const [Shadow(color: Color(0xCC000000), blurRadius: 14), Shadow(color: Color(0x99000000), blurRadius: 3)])),
       const SizedBox(height: 6),
       AnimatedSwitcher(
         duration: context.dur(350),
@@ -454,11 +454,11 @@ class _Caption extends StatelessWidget {
           key: ValueKey(titleKey),
           crossAxisAlignment: mobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
           children: [
-            Text(context.tr(titleKey), textAlign: mobile ? TextAlign.center : TextAlign.left, style: TS.h1(p).copyWith(fontSize: mobile ? 26 : 44)),
+            Text(context.tr(titleKey), textAlign: mobile ? TextAlign.center : TextAlign.left, style: TS.h1(p).copyWith(fontSize: mobile ? 26 : 44, color: Colors.white, shadows: const [Shadow(color: Color(0xCC000000), blurRadius: 14), Shadow(color: Color(0x99000000), blurRadius: 3)])),
             const SizedBox(height: 8),
             ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: mobile ? 320 : 380),
-                child: Text(context.tr(descKey), textAlign: mobile ? TextAlign.center : TextAlign.left, style: TS.bodyS(p).copyWith(fontSize: mobile ? 13 : 15, height: 1.5))),
+                child: Text(context.tr(descKey), textAlign: mobile ? TextAlign.center : TextAlign.left, style: TS.bodyS(p).copyWith(fontSize: mobile ? 13 : 15, height: 1.5, color: Colors.white.withValues(alpha: .92), shadows: const [Shadow(color: Color(0xCC000000), blurRadius: 14), Shadow(color: Color(0x99000000), blurRadius: 3)]))),
           ],
         ),
       ),
