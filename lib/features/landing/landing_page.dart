@@ -74,7 +74,8 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     final h = MediaQuery.sizeOf(context).height;
-    final seq = _seq;
+    // Footage is portrait: shown on phones only; larger screens keep the drawn plant animation.
+    final seq = context.isMobile ? _seq : null;
     Widget page(BuildContext context) => _page(context, h, seq);
     return Theme(data: seq == null ? Theme.of(context) : buildTheme(Brightness.dark), child: Builder(builder: page));
   }
