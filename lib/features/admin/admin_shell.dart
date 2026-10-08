@@ -99,7 +99,7 @@ class AdminShell extends StatelessWidget {
     final app = context.app;
     final wide = context.isDesktop;
     return Container(
-      width: wide ? 252 : 76,
+      width: wide ? 252 : 84,
       decoration: BoxDecoration(
         gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF2A1612), Color(0xFF140B09)]),
         border: Border(right: BorderSide(color: CI.alert.withValues(alpha: .35))),
@@ -121,13 +121,22 @@ class AdminShell extends StatelessWidget {
                     child: AnimatedContainer(
                       duration: context.dur(200),
                       margin: const EdgeInsets.symmetric(vertical: 2),
-                      padding: EdgeInsets.symmetric(horizontal: wide ? 14 : 0, vertical: 12),
+                      padding: EdgeInsets.symmetric(horizontal: wide ? 14 : 0, vertical: wide ? 12 : 8),
                       decoration: BoxDecoration(
                         color: app.adminPage == i ? CI.gold.withValues(alpha: .16) : Colors.transparent,
                         borderRadius: BorderRadius.circular(12),
                         border: Border(left: BorderSide(color: app.adminPage == i ? CI.gold : Colors.transparent, width: 3)),
                       ),
-                      child: Row(mainAxisAlignment: wide ? MainAxisAlignment.start : MainAxisAlignment.center, children: [
+                      child: !wide
+                          ? Column(mainAxisSize: MainAxisSize.min, children: [
+                              Icon(_nav[i].icon, size: 20, color: app.adminPage == i ? CI.gold : CI.cream.withValues(alpha: .7)),
+                              const SizedBox(height: 3),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 3),
+                                child: Text(context.tr(_nav[i].labelKey), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 9, height: 1.1, fontWeight: app.adminPage == i ? FontWeight.w700 : FontWeight.w500, color: app.adminPage == i ? CI.cream : CI.cream.withValues(alpha: .65))),
+                              ),
+                            ])
+                          : Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                         Icon(_nav[i].icon, size: 20, color: app.adminPage == i ? CI.gold : CI.cream.withValues(alpha: .7)),
                         if (wide) ...[const SizedBox(width: 12), Expanded(child: Text(context.tr(_nav[i].labelKey), style: TextStyle(fontSize: 13.5, fontWeight: app.adminPage == i ? FontWeight.w700 : FontWeight.w500, color: CI.cream.withValues(alpha: app.adminPage == i ? 1 : .75))))],
                       ]),
@@ -162,7 +171,7 @@ class AdminShell extends StatelessWidget {
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Icon(icon, color: sel ? p.accent : p.muted),
                 const SizedBox(height: 2),
-                Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: sel ? p.accent : p.muted)),
+                Text(label, maxLines: 2, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10, height: 1.1, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: sel ? p.accent : p.muted)),
               ]),
             ),
           ),

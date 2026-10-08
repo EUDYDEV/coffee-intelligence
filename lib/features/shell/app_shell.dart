@@ -261,7 +261,7 @@ class _Sidebar extends StatelessWidget {
     final app = context.app;
     return AnimatedContainer(
       duration: context.dur(300),
-      width: extended ? 252 : 76,
+      width: extended ? 252 : 84,
       decoration: BoxDecoration(
         gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: p.dark ? [const Color(0xFF1E120D), const Color(0xFF120A07)] : [CI.espresso, CI.espressoDeep]),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .25), blurRadius: 24)],
@@ -342,13 +342,22 @@ class _NavTileState extends State<_NavTile> {
         child: AnimatedContainer(
           duration: context.dur(200),
           margin: const EdgeInsets.symmetric(vertical: 2),
-          padding: EdgeInsets.symmetric(horizontal: widget.extended ? 14 : 0, vertical: 11),
+          padding: EdgeInsets.symmetric(horizontal: widget.extended ? 14 : 0, vertical: widget.extended ? 11 : 8),
           decoration: BoxDecoration(
             color: sel ? CI.gold.withValues(alpha: .16) : (_h ? Colors.white.withValues(alpha: .06) : Colors.transparent),
             borderRadius: BorderRadius.circular(12),
             border: Border(left: BorderSide(color: sel ? CI.gold : Colors.transparent, width: 3)),
           ),
-          child: Row(mainAxisAlignment: widget.extended ? MainAxisAlignment.start : MainAxisAlignment.center, children: [
+          child: !widget.extended
+              ? Column(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(n.icon, size: 20, color: sel ? CI.gold : CI.cream.withValues(alpha: app.isRestricted(n.id) ? .35 : .7)),
+                  const SizedBox(height: 3),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: Text(context.tr(n.labelKey), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 9, height: 1.1, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: sel ? CI.cream : CI.cream.withValues(alpha: .65))),
+                  ),
+                ])
+              : Row(mainAxisAlignment: MainAxisAlignment.start, children: [
             Icon(n.icon, size: 20, color: sel ? CI.gold : CI.cream.withValues(alpha: app.isRestricted(n.id) ? .35 : .7)),
             if (widget.extended) ...[
               const SizedBox(width: 12),
@@ -408,7 +417,7 @@ class _MobileTop extends StatelessWidget {
       child: Row(children: [
         SecretTap(onTriple: context.app.openLogin, child: const OrgLogo(height: 30, emblem: true)),
         const SizedBox(width: 8),
-        Expanded(child: Text(context.tr('org_short'), style: TextStyle(fontFamily: TS.display, fontWeight: FontWeight.w800, fontSize: 14, letterSpacing: 1.6, color: p.text))),
+        Expanded(child: Text(context.tr('final_kicker'), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: TS.display, fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: 1.8, color: p.text))),
         const RoleSwitcher(compact: true),
         const SizedBox(width: 6),
         const LangToggle(),
@@ -432,16 +441,16 @@ class _BottomNav extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 AnimatedContainer(
                   duration: context.dur(250),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                   decoration: BoxDecoration(color: sel ? p.accent.withValues(alpha: .18) : Colors.transparent, borderRadius: BorderRadius.circular(16)),
                   child: Icon(icon, size: 22, color: sel ? p.accent : p.muted),
                 ),
                 const SizedBox(height: 2),
-                Text(label, style: TextStyle(fontSize: 10, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: sel ? p.accent : p.muted), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 10, height: 1.1, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: sel ? p.accent : p.muted), maxLines: 2, overflow: TextOverflow.ellipsis),
               ]),
             ),
           ),
