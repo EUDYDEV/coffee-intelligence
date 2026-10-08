@@ -303,7 +303,7 @@ class _Stage extends StatelessWidget {
         ),
       ),
       // plant chapter caption
-      if (g > .02 && g < .52) _Caption(index: stage + 1, total: 13, titleKey: 'stage_${stage + 1}_t', descKey: 'stage_${stage + 1}_d', alpha: _e(g, .02, .05) * plantAlpha),
+      if (g > .02 && g < .52) _Caption(index: stage + 1, total: 13, titleKey: 'stage_${stage + 1}_t', descKey: 'stage_${stage + 1}_d', onVideo: seq != null, alpha: _e(g, .02, .05) * plantAlpha),
       // scenes
       _scene(context, .50, .64, 'scene_chain', _chain(context)),
       _scene(context, .64, .78, 'scene_data', _data(context)),
@@ -440,14 +440,15 @@ class _Caption extends StatelessWidget {
   final int index, total;
   final String titleKey, descKey;
   final double alpha;
-  const _Caption({required this.index, required this.total, required this.titleKey, required this.descKey, required this.alpha});
+  final bool onVideo; // white text with a shadow over the footage
+  const _Caption({required this.index, required this.total, required this.titleKey, required this.descKey, required this.alpha, this.onVideo = false});
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
     final mobile = context.isMobile;
     final num = index.toString().padLeft(2, '0');
     final body = Column(crossAxisAlignment: mobile ? CrossAxisAlignment.center : CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-      Text('$num / $total', style: TextStyle(fontFamily: TS.display, fontSize: mobile ? 14 : 18, color: p.gold, letterSpacing: 3, fontWeight: FontWeight.w700, shadows: const [Shadow(color: Color(0xCC000000), blurRadius: 14), Shadow(color: Color(0x99000000), blurRadius: 3)])),
+      Text('$num / $total', style: TextStyle(fontFamily: TS.display, fontSize: mobile ? 14 : 18, color: p.gold, letterSpacing: 3, fontWeight: FontWeight.w700, shadows: onVideo ? const [Shadow(color: Color(0xCC000000), blurRadius: 14), Shadow(color: Color(0x99000000), blurRadius: 3)] : null)),
       const SizedBox(height: 6),
       AnimatedSwitcher(
         duration: context.dur(350),
@@ -455,11 +456,11 @@ class _Caption extends StatelessWidget {
           key: ValueKey(titleKey),
           crossAxisAlignment: mobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
           children: [
-            Text(context.tr(titleKey), textAlign: mobile ? TextAlign.center : TextAlign.left, style: TS.h1(p).copyWith(fontSize: mobile ? 26 : 44, color: Colors.white, shadows: const [Shadow(color: Color(0xCC000000), blurRadius: 14), Shadow(color: Color(0x99000000), blurRadius: 3)])),
+            Text(context.tr(titleKey), textAlign: mobile ? TextAlign.center : TextAlign.left, style: TS.h1(p).copyWith(fontSize: mobile ? 26 : 44, color: onVideo ? Colors.white : null, shadows: onVideo ? const [Shadow(color: Color(0xCC000000), blurRadius: 14), Shadow(color: Color(0x99000000), blurRadius: 3)] : null)),
             const SizedBox(height: 8),
             ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: mobile ? 320 : 380),
-                child: Text(context.tr(descKey), textAlign: mobile ? TextAlign.center : TextAlign.left, style: TS.bodyS(p).copyWith(fontSize: mobile ? 13 : 15, height: 1.5, color: Colors.white.withValues(alpha: .92), shadows: const [Shadow(color: Color(0xCC000000), blurRadius: 14), Shadow(color: Color(0x99000000), blurRadius: 3)]))),
+                child: Text(context.tr(descKey), textAlign: mobile ? TextAlign.center : TextAlign.left, style: TS.bodyS(p).copyWith(fontSize: mobile ? 13 : 15, height: 1.5, color: onVideo ? Colors.white.withValues(alpha: .92) : null, shadows: onVideo ? const [Shadow(color: Color(0xCC000000), blurRadius: 14), Shadow(color: Color(0x99000000), blurRadius: 3)] : null))),
           ],
         ),
       ),
