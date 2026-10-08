@@ -108,6 +108,7 @@ class Strings {
     'decide_2': ['Tester des scénarios « Et si… »', 'Test “What if…” scenarios'],
     'decide_3': ['Décider avec des chiffres traçables', 'Decide with traceable figures'],
     'final_kicker': ['OIAC', 'IACO'],
+    'final_title': ['DU CAFÉ\nÀ L\'INTELLIGENCE', 'FROM COFFEE\nTO INTELLIGENCE'],
     'final_data': ['Données', 'Data'],
     'final_decision': ['Décision', 'Decision'],
 

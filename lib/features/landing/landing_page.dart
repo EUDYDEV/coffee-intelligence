@@ -318,7 +318,7 @@ class _Stage extends StatelessWidget {
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Text(context.tr('final_kicker').toUpperCase(), style: TS.label(p).copyWith(color: p.gold, letterSpacing: 3)),
                 const SizedBox(height: 14),
-                Text('FROM COFFEE\nTO INTELLIGENCE',
+                Text(context.tr('final_title'),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontFamily: TS.display, fontSize: mobile ? 38 : 72, fontWeight: FontWeight.w800, height: 1.02, color: p.text, shadows: [Shadow(color: p.gold.withValues(alpha: .5), blurRadius: 30)])),
                 const SizedBox(height: 18),
