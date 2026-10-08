@@ -450,7 +450,7 @@ class _BottomNav extends StatelessWidget {
                   child: Icon(icon, size: 22, color: sel ? p.accent : p.muted),
                 ),
                 const SizedBox(height: 2),
-                Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 10, height: 1.1, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: sel ? p.accent : p.muted), maxLines: 2, overflow: TextOverflow.ellipsis),
+                SizedBox(height: 24, child: Align(alignment: Alignment.topCenter, child: Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 10, height: 1.1, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: sel ? p.accent : p.muted), maxLines: 2, overflow: TextOverflow.ellipsis))),
               ]),
             ),
           ),
