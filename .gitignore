@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+tools/media/
+# Vidéos sources (le site n'utilise que les images extraites)

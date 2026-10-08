@@ -50,6 +50,8 @@ class ScrollSequence extends StatefulWidget {
 
 class _ScrollSequenceState extends State<ScrollSequence> {
   final Set<int> _requested = {};
+  final Set<int> _loaded = {}; // decoded frames (used to show the nearest ready frame while others load)
+  int _center = 1;
   static const _behind = 2, _ahead = 8;
 
   ImageProvider _provider(int i, int width) => ResizeImage(AssetImage(widget.manifest.frame(i)), width: width, allowUpscaling: false);
@@ -59,13 +61,28 @@ class _ScrollSequenceState extends State<ScrollSequence> {
     return w.clamp(480, widget.manifest.lite ? 960 : 1600).round();
   }
 
+  /// Closest frame that is already decoded (never leaves the screen empty during fast scrolls).
+  int _ready(int i) {
+    if (_loaded.isEmpty || _loaded.contains(i)) return i;
+    for (var d = 1; d < widget.manifest.frames; d++) {
+      if (_loaded.contains(i - d)) return i - d;
+      if (_loaded.contains(i + d)) return i + d;
+    }
+    return i;
+  }
+
   void _window(int center) {
+    _center = center;
     final m = widget.manifest;
     final w = _width;
     for (var i = center - _behind; i <= center + _ahead; i++) {
       final k = i.clamp(1, m.frames);
       if (_requested.add(k)) {
-        precacheImage(_provider(k, w), context).catchError((_) {});
+        precacheImage(_provider(k, w), context).then((_) {
+          if (!mounted) return;
+          _loaded.add(k);
+          if ((k - _center).abs() <= 2) setState(() {});
+        }).catchError((_) {});
       }
     }
     // free frames far outside the window
@@ -73,6 +90,7 @@ class _ScrollSequenceState extends State<ScrollSequence> {
     for (final k in far) {
       PaintingBinding.instance.imageCache.evict(_provider(k, w));
       _requested.remove(k);
+      _loaded.remove(k);
     }
   }
 
@@ -80,17 +98,40 @@ class _ScrollSequenceState extends State<ScrollSequence> {
   Widget build(BuildContext context) {
     final m = widget.manifest;
     final pos = widget.progress.clamp(0.0, 1.0) * (m.frames - 1) + 1;
-    final a = pos.floor(), b = math.min(a + 1, m.frames);
-    final t = pos - a;
-    _window(a);
+    final a0 = pos.floor(), b0 = math.min(a0 + 1, m.frames);
+    var t = pos - a0;
+    _window(a0);
+    final a = _ready(a0), b = _loaded.contains(b0) ? b0 : a;
+    if (b == a) t = 0;
     final w = _width;
     Widget img(int i, double o) => Opacity(
           opacity: o,
           child: Image(image: _provider(i, w), fit: BoxFit.cover, gaplessPlayback: true, filterQuality: FilterQuality.medium, errorBuilder: (_, __, ___) => const SizedBox()),
         );
     final push = 1.0 + .06 * widget.progress;
+    final screen = MediaQuery.sizeOf(context);
+    // Portrait footage on a wide screen: keep the frame whole in a centred column on a dark backdrop
+    // (cover-fitting would zoom a 9:16 clip far too much).
+    final framed = m.aspect < screen.width / screen.height * .8;
+    final footage = Transform.scale(scale: push, child: Stack(fit: StackFit.expand, children: [img(a, 1), if (t > .02 && b != a) img(b, t)]));
     return Stack(fit: StackFit.expand, children: [
-      Transform.scale(scale: push, child: Stack(fit: StackFit.expand, children: [img(a, 1), if (t > .02 && b != a) img(b, t)])),
+      if (framed) ...[
+        const DecoratedBox(
+          decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF120A07), Color(0xFF2A1812)])),
+        ),
+        Center(
+          child: SizedBox(
+            width: math.min(screen.width, screen.height * m.aspect),
+            height: screen.height,
+            child: ShaderMask(
+              blendMode: BlendMode.dstIn,
+              shaderCallback: (r) => const LinearGradient(stops: [0, .1, .9, 1], colors: [Colors.transparent, Colors.black, Colors.black, Colors.transparent]).createShader(r),
+              child: ClipRect(child: footage),
+            ),
+          ),
+        ),
+      ] else
+        footage,
       DecoratedBox(
         decoration: BoxDecoration(
           gradient: RadialGradient(radius: 1.05, colors: [Colors.transparent, Colors.black.withValues(alpha: .55)], stops: const [.55, 1]),
