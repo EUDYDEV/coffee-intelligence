@@ -252,14 +252,16 @@ class SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
+    final stack = trailing != null && context.w < 1100;
+    final head = Row(children: [
+      Container(width: 18, height: 2, color: p.gold),
+      const SizedBox(width: 8),
+      Expanded(child: Text(text.toUpperCase(), style: TS.label(p))),
+      if (trailing != null && !stack) trailing!,
+    ]);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Row(children: [
-        Container(width: 18, height: 2, color: p.gold),
-        const SizedBox(width: 8),
-        Expanded(child: Text(text.toUpperCase(), style: TS.label(p))),
-        if (trailing != null) trailing!,
-      ]),
+      child: stack ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [head, const SizedBox(height: 8), trailing!]) : head,
     );
   }
 }

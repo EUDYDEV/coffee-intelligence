@@ -82,13 +82,14 @@ class AdminShell extends StatelessWidget {
         _adminBadge(context),
         const SizedBox(width: 10),
         if (!mobile) Text(context.tr('adm_signed_as', [app.adminUser]), style: TS.bodyS(p)),
-        const Spacer(),
+        Expanded(child: Align(alignment: Alignment.centerRight, child: FittedBox(fit: BoxFit.scaleDown, child: Row(mainAxisSize: MainAxisSize.min, children: [
         if (!mobile) ...[const RoleSwitcher(compact: true), const SizedBox(width: 8), const LangToggle(), const SizedBox(width: 8), const CurrencyPicker(compact: true), const SizedBox(width: 8), const ThemeToggle(), const SizedBox(width: 12)],
         if (mobile) ...[const LangToggle(), const SizedBox(width: 6), const CurrencyPicker(compact: true), const SizedBox(width: 4)],
         mobile
             ? IconButton(tooltip: context.tr('adm_view_public'), onPressed: () => app.setAdminView(false), icon: Icon(Icons.public_rounded, color: p.accent))
             : PrimaryButton(context.tr('adm_view_public'), icon: Icons.public_rounded, outlined: true, onTap: () => app.setAdminView(false)),
         if (mobile) IconButton(tooltip: context.tr('adm_logout'), onPressed: app.logout, icon: Icon(Icons.logout_rounded, color: p.muted)),
+      ])))),
       ]),
     );
   }

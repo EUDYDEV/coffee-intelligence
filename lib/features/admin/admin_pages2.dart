@@ -106,7 +106,7 @@ class AdminUsersPage extends StatelessWidget {
               TextField(controller: name, decoration: InputDecoration(labelText: context.tr('adm_u_name'))),
               TextField(controller: org, decoration: InputDecoration(labelText: context.tr('adm_u_org'))),
               const SizedBox(height: 10),
-              DropdownButtonFormField<String>(
+              DropdownButtonFormField<String>(isExpanded: true, 
                 initialValue: role,
                 decoration: InputDecoration(labelText: context.tr('adm_u_role')),
                 items: [for (final r in roles) DropdownMenuItem(value: r.id, child: Text(context.tr(r.nameKey)))],

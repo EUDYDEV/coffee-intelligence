@@ -384,7 +384,7 @@ class _SaleCardState extends State<_SaleCard> {
           Chip2(context.tr(d.license), p.gold),
         ]),
         const SizedBox(height: 12),
-        Row(children: [
+        Wrap(spacing: 12, runSpacing: 10, alignment: WrapAlignment.spaceBetween, crossAxisAlignment: WrapCrossAlignment.center, children: [
           SizedBox(
             width: 150,
             child: TextField(
@@ -401,7 +401,6 @@ class _SaleCardState extends State<_SaleCard> {
               decoration: InputDecoration(isDense: true, labelText: '${context.tr('adm_price')} (${Fmt.sym})', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
             ),
           ),
-          const Spacer(),
           PrimaryButton(context.tr('adm_simulate_sale'), icon: Icons.shopping_cart_checkout_rounded, outlined: true, onTap: d.forSale
               ? () {
                   final buyer = buyers[(app.orders.length * 3 + d.id.length) % buyers.length];
@@ -470,7 +469,7 @@ class _AdminAddPageState extends State<AdminAddPage> {
     Widget field(int i) {
       final f = defs[i];
       if (f.type == 'country') {
-        return DropdownButtonFormField<String>(
+        return DropdownButtonFormField<String>(isExpanded: true, 
           initialValue: repo.countries().first.id,
           decoration: InputDecoration(labelText: context.tr(f.key), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
           items: [for (final c in repo.countries()) DropdownMenuItem(value: context.tr(c.nameKey), child: Text('${c.flag} ${context.tr(c.nameKey)}'))],
@@ -478,7 +477,7 @@ class _AdminAddPageState extends State<AdminAddPage> {
         );
       }
       if (f.type == 'port') {
-        return DropdownButtonFormField<String>(
+        return DropdownButtonFormField<String>(isExpanded: true, 
           decoration: InputDecoration(labelText: context.tr(f.key), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
           items: [for (final x in repo.ports()) DropdownMenuItem(value: x.id, child: Text('${x.id} · ${x.name}'))],
           onChanged: (v) => _c(ds, i).text = v ?? '',
@@ -500,7 +499,7 @@ class _AdminAddPageState extends State<AdminAddPage> {
       accent: p.gold,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         SectionLabel(context.tr('adm_new_entry')),
-        DropdownButtonFormField<String>(
+        DropdownButtonFormField<String>(isExpanded: true, 
           key: ValueKey(ds),
           initialValue: ds,
           decoration: InputDecoration(labelText: context.tr('adm_dataset'), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
