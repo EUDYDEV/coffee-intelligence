@@ -5,7 +5,7 @@ import 'core/theme/app_theme.dart';
 import 'features/shell/app_shell.dart';
 import 'features/shell/nav.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // ?a11y=1 keeps the accessibility (semantics) tree on: useful for screen readers and automated tests.
   if (Uri.base.queryParameters['a11y'] == '1') SemanticsBinding.instance.ensureSemantics();
@@ -21,6 +21,12 @@ class CoffeeIntelligenceApp extends StatefulWidget {
 
 class _CoffeeIntelligenceAppState extends State<CoffeeIntelligenceApp> {
   final AppState _state = AppState()..applyUri(Uri.base);
+
+  @override
+  void initState() {
+    super.initState();
+    _state.loadAccounts(); // restores visitor accounts / session saved in this browser
+  }
 
   @override
   void dispose() {

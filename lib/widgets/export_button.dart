@@ -7,6 +7,7 @@ import '../core/export/download.dart';
 import '../core/export/export_data.dart';
 import '../core/export/pdf_export.dart';
 import '../core/theme/palette.dart';
+import '../features/account/account_widgets.dart';
 
 String _stamp() {
   final n = DateTime.now();
@@ -23,6 +24,9 @@ class ExportButton extends StatelessWidget {
     final msg = ScaffoldMessenger.of(context);
     final done = context.tr('export_done');
     final fail = context.tr('export_fail');
+    // downloads need an active subscription (or a one-off payment)
+    if (!await ensureDownloadAccess(context, kind: kind, ref: pageId)) return;
+    if (!context.mounted) return;
     try {
       final doc = buildExport(pageId, context.tr);
       final base = 'oiac_${pageId}_${_stamp()}';
@@ -81,10 +85,12 @@ class ExportButton extends StatelessWidget {
     return Row(children: [
       Icon(i, color: p.accent),
       const SizedBox(width: 12),
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(t, style: TextStyle(fontWeight: FontWeight.w800, color: p.text)),
-        Text(d, style: TextStyle(fontSize: 11, color: p.muted)),
-      ]),
+      Expanded(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(t, style: TextStyle(fontWeight: FontWeight.w800, color: p.text)),
+          Text(d, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: p.muted)),
+        ]),
+      ),
     ]);
   }
 }

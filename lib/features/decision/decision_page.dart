@@ -14,6 +14,33 @@ import '../shell/nav.dart';
 import '../../widgets/drag_grid.dart';
 import 'role_dashboard.dart';
 
+/// "New here?" banner pointing to the user guide (dismissible).
+class _GuideHint extends StatelessWidget {
+  const _GuideHint();
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal;
+    final app = context.app;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
+      decoration: BoxDecoration(color: p.gold.withValues(alpha: .12), borderRadius: BorderRadius.circular(16), border: Border.all(color: p.gold.withValues(alpha: .6))),
+      child: Row(children: [
+        Icon(Icons.school_rounded, color: p.gold),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(context.tr('guide_hint'), style: TS.bodyS(p).copyWith(color: p.text)),
+            const SizedBox(height: 8),
+            PrimaryButton(context.tr('guide_hint_btn'), onTap: () => app.goto(navIndex('guide')), outlined: true),
+          ]),
+        ),
+        IconButton(tooltip: context.tr('close'), onPressed: app.dismissGuideHint, icon: Icon(Icons.close_rounded, size: 18, color: p.muted)),
+      ]),
+    );
+  }
+}
+
 class DecisionPage extends StatelessWidget {
   const DecisionPage({super.key});
   @override
@@ -27,6 +54,7 @@ class DecisionPage extends StatelessWidget {
     final fc = repo.forecast('price');
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       PageHeader('decision_title', 'decision_sub'),
+      if (context.app.guideHint) const _GuideHint(),
       const _ArrivalIntro(),
       Reveal(child: const _PulseCard()),
       gap24,

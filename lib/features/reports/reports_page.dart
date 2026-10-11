@@ -8,6 +8,7 @@ import '../../core/format.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/palette.dart';
 import '../../data/admin2_data.dart';
+import '../account/account_widgets.dart';
 import '../../data/repository.dart';
 import '../../data/role_data.dart';
 import '../../widgets/charts.dart';
@@ -69,6 +70,9 @@ class _ReportsPageState extends State<ReportsPage> with SingleTickerProviderStat
   }
 
   Future<void> _download(String id, String kind) async {
+    // a report download needs an active subscription (or a one-off payment)
+    if (!await ensureDownloadAccess(context, kind: 'report', ref: id)) return;
+    if (!mounted) return;
     final doc = reportDoc(id, context.tr);
     final base = 'oiac_report_${id}_${_stamp()}';
     final msg = ScaffoldMessenger.of(context);

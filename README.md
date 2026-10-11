@@ -89,3 +89,11 @@ menus, indicateurs, panneaux et pages réservées changent. **Simulation sans s�
 - **Cahier des charges** : page de conformité (exigence → fonction → écran → statut).
 
 Liens directs utiles : `?enter=1&role=coop&page=production&tab=quality&lang=en&cur=EUR`.
+
+## Guide, comptes visiteurs et abonnements (front-end uniquement)
+- **Guide d'utilisation** (page « Guide d'utilisation », icône ? en haut) : démarrage en 5 étapes, tâches pas à pas avec accès direct aux pages, légende, profils, FAQ, glossaire, progression et visite guidée.
+- **Compte visiteur** (page « Compte & abonnement ») : nom et prénoms, e-mail unique + code de vérification (affiché à l'écran, aucun e-mail réel), mot de passe haché (SHA-256 salé) ou connexion Google / Apple simulée, pseudo, pays (les 25 pays membres), ville, adresse facultative, date de naissance (18 ans +), genre. Pré-remplissage « approximatif » du pays depuis la région de l'appareil.
+- **Abonnements** : Visiteur (gratuit, consultation), Professionnel, Institution (mensuel / annuel). **Les téléchargements (exports CSV / PDF / PNG et rapports) sont réservés** : abonnement actif, ou paiement à l'unité avant la remise du fichier.
+- **Paiement simulé** (Mobile Money, carte, virement) : aucun argent n'est débité, aucune donnée bancaire n'est demandée.
+- Les comptes sont stockés **localement** (`shared_preferences` : localStorage sur le web) ; le code est isolé dans `lib/data/account_data.dart` et `AppState` pour être remplacé par une vraie API (authentification serveur, passerelle de paiement, e-mails) en production.
+- L'administrateur de démonstration n'est jamais bloqué par le paiement.

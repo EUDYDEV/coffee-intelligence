@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../data/account_data.dart';
 import '../core/format.dart';
 import '../data/admin2_data.dart';
 import '../data/admin_data.dart';
@@ -44,6 +47,7 @@ class AppState extends ChangeNotifier {
 
   void setRole(String id, {bool go = true}) {
     role = id;
+    guideDone.add('gc_profile');
     final r = roleById(id);
     productionTab = r.productionTab;
     chainTab = r.chainTab;
@@ -125,6 +129,200 @@ class AppState extends ChangeNotifier {
       ('Banque Agricole du Golfe', 'forecast', 2200.0, 12),
     ];
     return [for (final s in seed) Order(s.$1, s.$2, s.$3, now.subtract(Duration(days: s.$4)))];
+  }
+
+  // ---- guide: self-assessment checklist ----
+  bool guideHint = true; // "new here?" banner on the decision center
+  void dismissGuideHint() {
+    guideHint = false;
+    notifyListeners();
+  }
+
+  final Set<String> guideDone = {};
+  void toggleGuide(String id, bool on) {
+    on ? guideDone.add(id) : guideDone.remove(id);
+    notifyListeners();
+  }
+
+  // ---- visitor accounts & subscriptions (front-end demo: stored locally, no server, no real payment) ----
+  final List<Account> accounts = [];
+  Account? me; // signed-in visitor
+  String? pendingEmail; // account waiting for its (simulated) e-mail verification code
+  String? pendingCode;
+  bool persistAccounts = false; // set by main(); tests keep everything in memory
+
+  /// Free browsing for everyone; downloads need an active subscription (the demo admin is never blocked).
+  bool get canDownload => admin || (me?.hasActivePlan ?? false);
+
+  Future<void> loadAccounts() async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      final raw = sp.getString('oiac_accounts');
+      if (raw != null) {
+        accounts
+          ..clear()
+          ..addAll([for (final j in jsonDecode(raw) as List) Account.fromJson(j as Map<String, dynamic>)]);
+      }
+      final sid = sp.getString('oiac_session');
+      me = sid == null ? null : accounts.where((a) => a.id == sid && a.verified).firstOrNull;
+      persistAccounts = true;
+    } catch (_) {
+      persistAccounts = false;
+    }
+    notifyListeners();
+  }
+
+  Future<void> _saveAccounts() async {
+    if (!persistAccounts) return;
+    try {
+      final sp = await SharedPreferences.getInstance();
+      await sp.setString('oiac_accounts', jsonEncode([for (final a in accounts) a.toJson()]));
+      if (me == null) {
+        await sp.remove('oiac_session');
+      } else {
+        await sp.setString('oiac_session', me!.id);
+      }
+    } catch (_) {}
+  }
+
+  Account? _byEmail(String e) => accounts.where((a) => a.email == e.trim().toLowerCase()).firstOrNull;
+
+  /// Creates the account and "sends" a verification code. Returns an error key, or null when OK.
+  String? register({
+    required String fullName,
+    required String username,
+    required String email,
+    required String password,
+    required String country,
+    required String city,
+    required String address,
+    required DateTime birth,
+    required String gender,
+  }) {
+    final mail = email.trim().toLowerCase();
+    if (_byEmail(mail) != null) return 'acc_err_email_taken';
+    if (accounts.any((a) => a.username.toLowerCase() == username.trim().toLowerCase())) return 'acc_err_user_taken';
+    final salt = newSalt();
+    accounts.add(Account(
+      id: newId('u'),
+      fullName: fullName.trim(),
+      username: username.trim(),
+      email: mail,
+      passHash: hashPassword(password, salt),
+      salt: salt,
+      country: country,
+      city: city.trim(),
+      address: address.trim(),
+      gender: gender,
+      birth: birth,
+      created: DateTime.now(),
+    ));
+    pendingEmail = mail;
+    pendingCode = newCode();
+    addLog('log_register', mail);
+    _saveAccounts();
+    notifyListeners();
+    return null;
+  }
+
+  /// New code for an account that is not verified yet.
+  void resendCode(String email) {
+    pendingEmail = email.trim().toLowerCase();
+    pendingCode = newCode();
+    notifyListeners();
+  }
+
+  String? verifyCode(String code) {
+    final a = pendingEmail == null ? null : _byEmail(pendingEmail!);
+    if (a == null || pendingCode == null || code.trim() != pendingCode) return 'acc_err_code';
+    a.verified = true;
+    me = a;
+    guideDone.add('gc_account');
+    pendingEmail = null;
+    pendingCode = null;
+    addLog('log_visitor_in', a.email);
+    _saveAccounts();
+    notifyListeners();
+    return null;
+  }
+
+  /// Sign in with e-mail or username + password. Returns an error key, or null when OK.
+  String? loginVisitor(String id, String password) {
+    final k = id.trim().toLowerCase();
+    final a = accounts.where((x) => x.email == k || x.username.toLowerCase() == k).firstOrNull;
+    if (a == null || a.social != null && password.isEmpty) return 'acc_err_login';
+    if (hashPassword(password, a.salt) != a.passHash) return 'acc_err_login';
+    if (!a.verified) {
+      resendCode(a.email);
+      return 'acc_err_unverified';
+    }
+    me = a;
+    addLog('log_visitor_in', a.email);
+    _saveAccounts();
+    notifyListeners();
+    return null;
+  }
+
+  /// Simulated Google / Apple sign-in: creates (or reuses) a demo account, already verified.
+  Account socialLogin(String provider, {required String country}) {
+    final mail = 'demo.${provider.toLowerCase()}@example.org';
+    var a = _byEmail(mail);
+    if (a == null) {
+      final salt = newSalt();
+      a = Account(
+        id: newId('u'),
+        fullName: provider == 'google' ? 'Utilisateur Google (démo)' : 'Utilisateur Apple (démo)',
+        username: 'demo_$provider',
+        email: mail,
+        passHash: hashPassword(newCode(), salt),
+        salt: salt,
+        country: country,
+        city: '',
+        address: '',
+        gender: 'n',
+        birth: DateTime(1990, 1, 1),
+        created: DateTime.now(),
+        verified: true,
+        social: provider,
+      );
+      accounts.add(a);
+    }
+    me = a;
+    addLog('log_visitor_in', mail);
+    _saveAccounts();
+    notifyListeners();
+    return a;
+  }
+
+  void logoutVisitor() {
+    me = null;
+    _saveAccounts();
+    notifyListeners();
+  }
+
+  /// Simulated payment of a subscription (no money moves).
+  void subscribe(String planId, String cycle, String method) {
+    final a = me;
+    if (a == null) return;
+    final def = planById(planId);
+    final price = cycle == 'year' ? def.yearUsd : def.monthUsd;
+    a.plan = planId;
+    a.cycle = cycle;
+    a.planUntil = DateTime.now().add(Duration(days: cycle == 'year' ? 365 : 30));
+    a.purchases.insert(0, Purchase(newId('p'), 'plan', '${def.nameKey}|$cycle', price, method, DateTime.now()));
+    addLog('log_subscribe', '$planId/$cycle');
+    _saveAccounts();
+    notifyListeners();
+  }
+
+  /// Simulated one-off payment for a single download.
+  void buyItem(String kind, String label, String method) {
+    final a = me;
+    if (a == null) return;
+    a.purchases.insert(0, Purchase(newId('p'), 'item', label, itemPriceUsd(kind), method, DateTime.now()));
+    addLog('log_purchase', label);
+    _saveAccounts();
+    notifyListeners();
   }
 
   void openLogin() {

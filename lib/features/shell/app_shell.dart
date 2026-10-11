@@ -182,6 +182,18 @@ class _AppShellState extends State<AppShell> {
           child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
             const Align(alignment: Alignment.centerLeft, child: Wrap(spacing: 10, runSpacing: 8, children: [RoleSwitcher(), CurrencyPicker()])),
             const SizedBox(height: 12),
+            Row(children: [
+              Expanded(child: PrimaryButton(context.tr('nav_guide'), icon: Icons.school_rounded, outlined: true, onTap: () {
+                Navigator.pop(c);
+                context.app.goto(navIndex('guide'));
+              })),
+              const SizedBox(width: 10),
+              Expanded(child: PrimaryButton(context.app.me == null ? context.tr('acc_signin') : '@${context.app.me!.username}', icon: Icons.workspace_premium_rounded, onTap: () {
+                Navigator.pop(c);
+                context.app.goto(navIndex('account'));
+              })),
+            ]),
+            const SizedBox(height: 12),
             Wrap(spacing: 10, runSpacing: 10, children: [
               for (var i = 0; i < navItems.length; i++)
                 SizedBox(
@@ -386,6 +398,9 @@ class _DesktopTop extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(child: Text(context.tr('live_demo'), maxLines: 2, overflow: TextOverflow.ellipsis, style: TS.label(p))),
         const SizedBox(width: 12),
+        IconButton(tooltip: context.tr('nav_guide'), onPressed: () => app.goto(navIndex('guide')), icon: Icon(Icons.help_outline_rounded, color: p.gold)),
+        _AccountChip(compact: context.w <= 1100),
+        const SizedBox(width: 8),
         if (context.w > 1000) Text('${context.tr('role_profile')} : ', style: TS.bodyS(p)),
         if (context.w > 1000) Text(context.tr(app.roleDef.nameKey), style: TS.h3(p).copyWith(color: app.roleDef.color)),
         const SizedBox(width: 14),
@@ -403,6 +418,24 @@ class _DesktopTop extends StatelessWidget {
         PrimaryButton(context.tr('assistant_name'), icon: Icons.auto_awesome_rounded, onTap: onAssist),
       ]),
     );
+  }
+}
+
+/// Shortcut to the visitor account / subscription page.
+class _AccountChip extends StatelessWidget {
+  final bool compact;
+  const _AccountChip({required this.compact});
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal;
+    final app = context.app;
+    final me = app.me;
+    final active = me?.hasActivePlan == true;
+    final label = me == null ? context.tr('acc_signin') : '@${me.username}';
+    final icon = me == null ? Icons.person_outline_rounded : (active ? Icons.workspace_premium_rounded : Icons.person_rounded);
+    void go() => app.goto(navIndex('account'));
+    if (compact) return IconButton(tooltip: label, onPressed: go, icon: Icon(icon, color: active ? p.green : p.muted));
+    return TextButton.icon(onPressed: go, icon: Icon(icon, size: 18, color: active ? p.green : p.muted), label: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 130), child: Text(label, overflow: TextOverflow.ellipsis, style: TextStyle(color: p.text, fontWeight: FontWeight.w600, fontSize: 13))));
   }
 }
 

@@ -50,6 +50,9 @@ const _reqs = <_Req>[
   _Req('tor_s5', 'req_lang_more', 'fn_lang_more', 'settings', St.partial),
   _Req('tor_s5', 'req_alerts', 'fn_alerts', 'alerts', St.complete),
   _Req('tor_s5', 'req_export', 'fn_export', 'market', St.complete),
+  _Req('tor_s6', 'req_guide', 'fn_guide', 'guide', St.complete),
+  _Req('tor_s6', 'req_signup', 'fn_signup', 'account', St.simulated),
+  _Req('tor_s6', 'req_paywall', 'fn_paywall', 'account', St.simulated),
   // 6. Users
   _Req('tor_s6', 'req_u_coop', 'fn_u_coop', 'decision', St.complete),
   _Req('tor_s6', 'req_u_exporter', 'fn_u_exporter', 'decision', St.complete),
@@ -64,6 +67,7 @@ const _reqs = <_Req>[
 
 /// Production deliverables: not part of a front-end demo.
 const _deliverables = <_Req>[
+  _Req('tor_b', 'req_b_payment', 'fn_b_payment', 'compliance', St.out),
   _Req('tor_b', 'req_cloud', 'fn_cloud', 'compliance', St.out),
   _Req('tor_b', 'req_b_warehouse', 'fn_b_warehouse', 'compliance', St.out),
   _Req('tor_b', 'req_b_etl', 'fn_b_etl', 'compliance', St.out),
