@@ -172,14 +172,14 @@ class RolePanel extends StatelessWidget {
 
     switch (app.role) {
       case 'public':
-        final ranked = [...af]..sort((a, b) => b.prodKt.compareTo(a.prodKt));
+        final ranked = ([...af]..sort((a, b) => b.prodKt.compareTo(a.prodKt))).take(15).toList();
         return TwoCol(
           flexL: 6,
           flexR: 4,
           left: GlassCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('rp_members', [af.length])),
-              BarChartW(height: 230, sourceId: 'production', unit: 'kt', legend: [(p.accent, context.tr('kpi_prod'))], fmt: (v) => Fmt.num(v, v < 10 ? 1 : 0), items: [for (final c in ranked) BarItem(c.id, c.prodKt, p.accent)], onTap: (i) {
+              HBarChart(sourceId: 'production', unit: 'kt', legend: [(p.accent, context.tr('kpi_prod'))], fmt: (v) => Fmt.num(v, v < 10 ? 1 : 0), note: context.tr('top_n_note', [ranked.length, af.length]), items: [for (final c in ranked) BarItem('${c.flag} ${context.tr(c.nameKey)}', c.prodKt, p.accent)], onTap: (i) {
                 app.selectCountry(ranked[i].id);
                 app.goto(navIndex('map'));
               }),
@@ -311,7 +311,7 @@ class RolePanel extends StatelessWidget {
           left: GlassCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('rp_intl_compare', [context.tr(c.nameKey)])),
-              BarChartW(height: 230, sourceId: 'production', unit: 'kt', legend: [(p.accent, context.tr(c.nameKey)), (p.muted, context.tr('world'))], fmt: (v) => Fmt.num(v, 0), items: [for (final x in top) BarItem('${x.flag} ${x.id}', x.prodKt, x.id == c.id ? p.accent : p.muted)]),
+              HBarChart(sourceId: 'production', unit: 'kt', legend: [(p.accent, context.tr(c.nameKey)), (p.muted, context.tr('world'))], fmt: (v) => Fmt.num(v, v < 10 ? 1 : 0), items: [for (final x in top) BarItem('${x.flag} ${context.tr(x.nameKey)}', x.prodKt, x.id == c.id ? p.accent : p.muted)]),
             ]),
           ),
           right: GlassCard(

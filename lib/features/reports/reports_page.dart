@@ -291,7 +291,14 @@ class _Preview extends StatelessWidget {
           Expanded(child: _K(context.tr('kpi_income'), Fmt.usd(repo.africaIncome(), 0), p)),
         ]),
         const SizedBox(height: 14),
-        BarChartW(height: 170, sourceId: 'production', unit: 'kt', legend: [(p.accent, context.tr('kpi_prod'))], fmt: (v) => Fmt.num(v, 0), items: [for (final c in af) BarItem(c.id, c.prodKt, p.accent)]),
+        HBarChart(
+          sourceId: 'production',
+          unit: 'kt',
+          legend: [(p.accent, context.tr('kpi_prod'))],
+          fmt: (v) => Fmt.num(v, v < 10 ? 1 : 0),
+          note: context.tr('top_n_note', [15, af.length]),
+          items: [for (final c in ([...af]..sort((a, b) => b.prodKt.compareTo(a.prodKt))).take(15)) BarItem('${c.flag} ${context.tr(c.nameKey)}', c.prodKt, p.accent)],
+        ),
         const SizedBox(height: 14),
         Wrap(spacing: 10, runSpacing: 10, children: [
           PrimaryButton(context.tr('download_pdf'), icon: Icons.picture_as_pdf_rounded, onTap: () => onDownload('pdf')),

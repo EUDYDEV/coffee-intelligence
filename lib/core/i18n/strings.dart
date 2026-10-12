@@ -1763,5 +1763,7 @@ class Strings {
     'rp_public_space': ['Vous êtes dans l’espace public', 'You are in the public space'],
     'rp_public_space_d': ['Les espaces Coopérative / agriculteur, Exportateur, Torréfacteur, ONG et Office national sont privés : ils sont réservés aux partenaires.', 'The Cooperative / farmer, Exporter, Roaster, NGO and National board spaces are private: they are reserved for partners.'],
     'log_partner_in': ['Connexion partenaire', 'Partner sign-in'],
+    'top_n_note': ['{0} premiers sur {1}', 'Top {0} of {1}'],
+    'ind_exports': ['Exportations (pays membres)', 'Exports (member countries)'],
   };
 }

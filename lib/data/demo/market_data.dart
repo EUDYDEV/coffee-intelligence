@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import '../../models/models.dart';
+import 'countries_data.dart';
 
 /// Deterministic pseudo-random generator (identical on every platform).
 class Lcg {
@@ -121,6 +122,8 @@ List<MarketIndicator> marketIndicators() {
     MarketIndicator('robusta', r.last.v, -0.4, ch(r, 1), ch(r, 12), '\$/lb'),
     MarketIndicator('spread', a.last.v - r.last.v, 1.9, 3.4, 8.1, '\$/lb'),
     MarketIndicator('volatility', 24.6, 3.0, 11.0, 18.0, '%'),
+    // exports of the 25 member countries (thousand tonnes, green coffee)
+    MarketIndicator('exports', demoCountries.where((c) => c.african).fold(0.0, (t, c) => t + c.exportsKt), .3, 1.8, 4.6, 'kt'),
   ];
 }
 

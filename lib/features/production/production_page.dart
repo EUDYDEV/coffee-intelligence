@@ -25,7 +25,10 @@ class _ProductionPageState extends State<ProductionPage> {
     final app = context.app;
     final af = repo.countries(africaOnly: true);
     final c = repo.country(app.selectedCountry.isEmpty || !repo.country(app.selectedCountry).african ? 'ETH' : app.selectedCountry);
-    final list = [...repo.countries(africaOnly: _africaOnly)]..sort((a, b) => b.prodKt.compareTo(a.prodKt));
+    final all = [...repo.countries(africaOnly: _africaOnly)]..sort((a, b) => b.prodKt.compareTo(a.prodKt));
+    final list = all.take(15).toList(); // top 15 keeps the chart readable
+    final byYield = ([...af]..sort((a, b) => b.yieldKgHa.compareTo(a.yieldKgHa))).take(15).toList();
+    String kt(double v) => Fmt.num(v, v < 10 ? 1 : 0);
     final coops = repo.coops().where((x) => x.country == c.id).toList();
     final totalProd = af.fold(0.0, (a, x) => a + x.prodKt);
     final totalProducers = af.fold(0.0, (a, x) => a + x.producersK);
@@ -62,15 +65,17 @@ class _ProductionPageState extends State<ProductionPage> {
         child: GlassCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             SectionLabel(context.tr('prod_by_country'), trailing: Segmented<bool>(values: const [true, false], selected: _africaOnly, label: (v) => v ? context.tr('africa') : context.tr('world'), onChanged: (v) => setState(() => _africaOnly = v))),
-            BarChartW(
-                sourceId: 'production', unit: 'kt', legend: [(p.accent, context.tr('africa')), (p.muted, context.tr('world'))],
-              height: 260,
-              fmt: (v) => Fmt.num(v, 0),
+            HBarChart(
+              sourceId: 'production',
+              unit: 'kt',
+              legend: [(p.accent, context.tr('africa')), (p.muted, context.tr('world'))],
+              fmt: kt,
               selected: list.indexWhere((x) => x.id == c.id),
               onTap: (i) {
                 if (list[i].african) app.selectCountry(list[i].id);
               },
-              items: [for (final x in list) BarItem('${x.flag} ${x.id}', x.prodKt, x.african ? p.accent : p.muted)],
+              note: context.tr('top_n_note', [list.length, all.length]),
+              items: [for (final x in list) BarItem('${x.flag} ${context.tr(x.nameKey)}', x.prodKt, x.african ? p.accent : p.muted)],
             ),
           ]),
         ),
@@ -81,8 +86,13 @@ class _ProductionPageState extends State<ProductionPage> {
           child: GlassCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('yield_by_country')),
-              BarChartW(
-                sourceId: 'production', unit: 'kg/ha',height: 230, fmt: (v) => Fmt.num(v, 0), items: [for (final x in [...af]..sort((a, b) => b.yieldKgHa.compareTo(a.yieldKgHa))) BarItem(x.id, x.yieldKgHa, p.green)]),
+              HBarChart(
+                sourceId: 'production',
+                unit: 'kg/ha',
+                fmt: (v) => Fmt.num(v, 0),
+                note: context.tr('top_n_note', [byYield.length, af.length]),
+                items: [for (final x in byYield) BarItem('${x.flag} ${context.tr(x.nameKey)}', x.yieldKgHa, p.green)],
+              ),
             ]),
           ),
         ),

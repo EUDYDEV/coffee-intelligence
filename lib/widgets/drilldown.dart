@@ -77,6 +77,9 @@ class _DrillDownState extends State<DrillDown> {
     final p = context.pal;
     final app = context.app;
     final nodes = _children(context);
+    // sorted by the chosen metric; at most 15 bars so that names stay readable
+    final allNodes = [...nodes]..sort((a, b) => _val(b).compareTo(_val(a)));
+    final shown = allNodes.take(15).toList();
     final leaf = _path.length >= 5;
     final lotId = leaf ? _path[4] : '';
     return GlassCard(
@@ -103,15 +106,15 @@ class _DrillDownState extends State<DrillDown> {
         else if (nodes.isEmpty)
           Padding(padding: const EdgeInsets.all(20), child: Center(child: Text(context.tr('dd_empty'), style: TS.bodyS(p))))
         else
-          BarChartW(
+          HBarChart(
             key: ValueKey('${_path.join('/')}$_metric$_unit'),
-            height: 250,
             sourceId: _metric == 'income' ? 'survey' : (_metric == 'quality' ? 'coops' : 'production'),
             unit: _unitLabel(),
             legend: [(p.accent, context.tr(_levels[_path.length + 1 > 5 ? 5 : _path.length + 1]))],
             fmt: _fmt,
-            onTap: (i) => setState(() => _path.add(nodes[i].key)),
-            items: [for (final n in nodes) BarItem(n.label.length > 12 ? '${n.label.substring(0, 11)}…' : n.label, _val(n), p.accent)],
+            note: allNodes.length > shown.length ? context.tr('top_n_note', [shown.length, allNodes.length]) : null,
+            onTap: (i) => setState(() => _path.add(shown[i].key)),
+            items: [for (final n in shown) BarItem(n.label, _val(n), p.accent)],
           ),
         if (!leaf && nodes.isNotEmpty)
           Padding(

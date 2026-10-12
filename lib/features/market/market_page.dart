@@ -37,7 +37,7 @@ class _MarketPageState extends State<MarketPage> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       PageHeader('market_title', 'market_sub',
           trailing: Segmented<int>(values: const [6, 12, 36], selected: _months, label: (v) => v == 36 ? '3 ${context.tr('y')}' : (v == 12 ? '1 ${context.tr('y')}' : '6 ${context.tr('m')}'), onChanged: (v) => setState(() => _months = v))),
-      Grid(columns: context.cols(desktop: 4, tablet: 2, mobile: 1), children: [
+      Grid(columns: context.cols(desktop: ind.length, tablet: 3, mobile: 1), children: [
         for (var i = 0; i < ind.length; i++)
           Reveal(delay: i * 80, child: _IndCard(ind[i], i)),
       ]),
@@ -137,13 +137,14 @@ class _IndCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.pal;
     final isPct = ind.unit == '%';
-    final metric = i == 1 ? 'price_robusta' : 'price_arabica';
+    final isKt = ind.unit == 'kt';
+    final metric = isKt ? 'exports' : (i == 1 ? 'price_robusta' : 'price_arabica');
     return GlassCard(
       onTap: () => showTrust(context, metric, ind.value, context.tr('ind_${ind.key}'), ind.unit),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(context.tr('ind_${ind.key}').toUpperCase(), style: TS.label(p)),
         const SizedBox(height: 10),
-        AnimatedCounter(isPct ? ind.value : Fmt.conv(ind.value), decimals: isPct ? 1 : Fmt.decFor(2), suffix: isPct ? ' %' : ' ${Fmt.unit(r'$/lb')}', style: TS.big(p, size: 28)),
+        AnimatedCounter(isPct || isKt ? ind.value : Fmt.conv(ind.value), decimals: isKt ? 0 : (isPct ? 1 : Fmt.decFor(2)), suffix: isKt ? ' kt' : (isPct ? ' %' : ' ${Fmt.unit(r'$/lb')}'), style: TS.big(p, size: 28)),
         const SizedBox(height: 12),
         Row(children: [
           _mini(context, context.tr('daily'), ind.day),

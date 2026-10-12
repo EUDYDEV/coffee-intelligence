@@ -819,3 +819,107 @@ class ChartFooter extends StatelessWidget {
     );
   }
 }
+
+/// Horizontal bars with the full label on the left: country names stay readable, also on phones.
+class HBarChart extends StatefulWidget {
+  final List<BarItem> items;
+  final String Function(double) fmt;
+  final int? selected;
+  final ValueChanged<int>? onTap;
+  final String? sourceId;
+  final String? unit;
+  final List<(Color, String)> legend;
+  final String? note; // e.g. "15 premiers pays sur 25"
+  const HBarChart({super.key, required this.items, this.fmt = BarChartW._f, this.selected, this.onTap, this.sourceId, this.unit, this.legend = const [], this.note});
+  @override
+  State<HBarChart> createState() => _HBarChartState();
+}
+
+class _HBarChartState extends State<HBarChart> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(vsync: this);
+  bool _init = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_init) return;
+    _init = true;
+    _c.duration = context.dur(1200);
+    _c.forward();
+  }
+
+  @override
+  void didUpdateWidget(HBarChart o) {
+    super.didUpdateWidget(o);
+    if (o.items.length != widget.items.length || (o.items.isNotEmpty && widget.items.isNotEmpty && o.items.first.value != widget.items.first.value)) _c.forward(from: .3);
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal;
+    final mx = widget.items.fold(0.0, (a, b) => math.max(a, b.value.abs()));
+    final labelW = context.isMobile ? 118.0 : 168.0;
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+      AnimatedBuilder(
+        animation: _c,
+        builder: (_, __) => Column(children: [
+          for (var i = 0; i < widget.items.length; i++)
+            () {
+              final b = widget.items[i];
+              final sel = widget.selected == i;
+              final delay = i / (widget.items.length * 2.2);
+              final k = Curves.easeOutCubic.transform(((_c.value - delay) / (1 - delay)).clamp(0.0, 1.0));
+              final f = mx == 0 ? 0.0 : (b.value.abs() / mx * k).clamp(0.0, 1.0);
+              return MouseRegion(
+                cursor: widget.onTap == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: widget.onTap == null ? null : () => widget.onTap!(i),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+                    decoration: BoxDecoration(color: sel ? p.gold.withValues(alpha: .14) : Colors.transparent, borderRadius: BorderRadius.circular(8)),
+                    child: Row(children: [
+                      SizedBox(
+                        width: labelW,
+                        child: Text(b.label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.5, fontWeight: sel ? FontWeight.w800 : FontWeight.w600, color: p.text)),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Container(
+                          height: 14,
+                          decoration: BoxDecoration(color: p.surface2, borderRadius: BorderRadius.circular(7)),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: FractionallySizedBox(
+                              widthFactor: f,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(7),
+                                  border: sel ? Border.all(color: p.gold, width: 1.5) : null,
+                                  gradient: LinearGradient(colors: [b.color, Color.lerp(b.color, CI.espresso, .3)!]),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(width: 62, child: Text(b.valueLabel ?? widget.fmt(b.value), textAlign: TextAlign.right, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: p.text))),
+                    ]),
+                  ),
+                ),
+              );
+            }(),
+        ]),
+      ),
+      if (widget.note != null) Padding(padding: const EdgeInsets.only(top: 6, left: 6), child: Text(widget.note!, style: TS.bodyS(p).copyWith(fontSize: 11.5))),
+      ChartFooter(sourceId: widget.sourceId, legend: widget.legend, unit: widget.unit),
+    ]);
+  }
+}
