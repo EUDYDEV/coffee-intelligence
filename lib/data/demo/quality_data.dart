@@ -20,6 +20,25 @@ const _qBase = <String, (double, String, String, int, List<String>)>{
   'UGA': (80.5, 'SL14 / Robusta', 'proc_natural', 1500, ['qn_chocolate', 'qn_nutty', 'qn_spice']),
   'TZA': (83.0, 'Bourbon / Kent', 'proc_washed', 1600, ['qn_citrus', 'qn_caramel', 'qn_redfruit']),
   'CIV': (78.5, 'Robusta (Conilon)', 'proc_natural', 450, ['qn_chocolate', 'qn_woody', 'qn_nutty']),
+  'CMR': (81.0, 'Java / Robusta', 'proc_washed', 1300, ['qn_chocolate', 'qn_spice', 'qn_nutty']),
+  'COD': (82.0, 'Bourbon / Robusta', 'proc_washed', 1600, ['qn_redfruit', 'qn_chocolate', 'qn_spice']),
+  'MDG': (78.0, 'Robusta (Kouillou)', 'proc_natural', 500, ['qn_woody', 'qn_spice', 'qn_chocolate']),
+  'GIN': (79.0, 'Robusta (Ziama)', 'proc_natural', 600, ['qn_chocolate', 'qn_nutty', 'qn_woody']),
+  'BDI': (84.5, 'Red Bourbon', 'proc_washed', 1700, ['qn_caramel', 'qn_redfruit', 'qn_floral']),
+  'TGO': (79.5, 'Robusta', 'proc_natural', 700, ['qn_chocolate', 'qn_nutty', 'qn_spice']),
+  'CAF': (77.5, 'Robusta', 'proc_natural', 550, ['qn_woody', 'qn_nutty', 'qn_spice']),
+  'AGO': (78.5, 'Robusta (Amboim)', 'proc_natural', 900, ['qn_chocolate', 'qn_woody', 'qn_nutty']),
+  'SLE': (78.0, 'Robusta (Stenophylla)', 'proc_natural', 450, ['qn_chocolate', 'qn_spice', 'qn_woody']),
+  'NGA': (78.5, 'Robusta / Arabica', 'proc_natural', 1000, ['qn_nutty', 'qn_chocolate', 'qn_spice']),
+  'MWI': (83.0, 'Geisha / Catimor', 'proc_washed', 1500, ['qn_citrus', 'qn_caramel', 'qn_floral']),
+  'GHA': (77.5, 'Robusta', 'proc_natural', 400, ['qn_woody', 'qn_nutty', 'qn_chocolate']),
+  'COG': (77.0, 'Robusta', 'proc_natural', 450, ['qn_woody', 'qn_spice', 'qn_nutty']),
+  'ZMB': (82.5, 'Catimor', 'proc_washed', 1400, ['qn_citrus', 'qn_caramel', 'qn_nutty']),
+  'BEN': (77.0, 'Robusta', 'proc_natural', 300, ['qn_woody', 'qn_nutty', 'qn_spice']),
+  'LBR': (77.5, 'Robusta / Liberica', 'proc_natural', 400, ['qn_woody', 'qn_spice', 'qn_chocolate']),
+  'ZWE': (83.0, 'Catimor / SL28', 'proc_washed', 1300, ['qn_citrus', 'qn_redfruit', 'qn_caramel']),
+  'GAB': (77.0, 'Robusta', 'proc_natural', 450, ['qn_woody', 'qn_nutty', 'qn_spice']),
+  'GNQ': (76.5, 'Robusta', 'proc_natural', 400, ['qn_woody', 'qn_spice', 'qn_nutty']),
   'BRA': (82.0, 'Catuai / Mundo Novo', 'proc_natural', 1100, ['qn_chocolate', 'qn_nutty', 'qn_caramel']),
   'COL': (84.5, 'Caturra / Castillo', 'proc_washed', 1700, ['qn_caramel', 'qn_redfruit', 'qn_citrus']),
   'VNM': (76.0, 'Robusta', 'proc_natural', 600, ['qn_woody', 'qn_spice', 'qn_nutty']),
@@ -65,7 +84,7 @@ QualityProfile qualityFor(String key) {
   final b = _qBase[country] ?? _qBase['ETH']!;
   final score = (b.$1 + spread).clamp(70.0, 92.0);
   double attr(double off, String salt) => ((score / 10 + off + (_h(key + salt) - .5) * 1.1)).clamp(5.5, 9.5);
-  final isRob = country == 'CIV' || country == 'VNM';
+  final isRob = (demoCountries.where((c) => c.id == country).firstOrNull?.arabicaShare ?? 1) < .3;
   final acid = attr(isRob ? -.6 : .3, 'a'), body = attr(isRob ? .6 : .0, 'b'), sweet = attr(.0, 's');
   final aroma = attr(.1, 'r'), after = attr(-.1, 't'), bal = attr(-.05, 'l');
   final defects = (_h(key + 'd') * (isRob ? 4.5 : 2.6)).floor();
@@ -188,7 +207,10 @@ const lotSteps = <(String, String, int)>[
   ('lot_roaster', 'lot_loc_roaster', 80),
 ];
 
-const _iso2 = {'ETH': 'ET', 'KEN': 'KE', 'UGA': 'UG', 'RWA': 'RW', 'TZA': 'TZ', 'CIV': 'CI'};
+const _iso2 = {
+  'ETH': 'ET', 'KEN': 'KE', 'UGA': 'UG', 'RWA': 'RW', 'TZA': 'TZ', 'CIV': 'CI', 'CMR': 'CM', 'COD': 'CD', 'BDI': 'BI', 'GIN': 'GN', 'TGO': 'TG', 'MDG': 'MG',
+  'AGO': 'AO', 'BEN': 'BJ', 'CAF': 'CF', 'COG': 'CG', 'GAB': 'GA', 'GHA': 'GH', 'GNQ': 'GQ', 'LBR': 'LR', 'MWI': 'MW', 'NGA': 'NG', 'SLE': 'SL', 'ZMB': 'ZM', 'ZWE': 'ZW',
+};
 
 final List<Lot> demoLots = [
   for (var i = 0; i < 12; i++)

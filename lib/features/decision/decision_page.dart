@@ -50,7 +50,8 @@ class DecisionPage extends StatelessWidget {
     final spark = arab.sublist(arab.length - 12).map((e) => e.v).toList();
     final prod = repo.africaProduction();
     final risks = repo.risks();
-    final climate = repo.countries(africaOnly: true).fold(0.0, (a, c) => a + c.climateRisk) / 6;
+    final afc = repo.countries(africaOnly: true);
+    final climate = afc.fold(0.0, (a, c) => a + c.climateRisk) / afc.length;
     final fc = repo.forecast('price');
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       PageHeader('decision_title', 'decision_sub'),

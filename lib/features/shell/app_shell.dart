@@ -9,6 +9,7 @@ import '../../widgets/org_logo.dart';
 import '../assistant/assistant_panel.dart';
 import '../admin/admin_shell.dart';
 import '../admin/login_page.dart';
+import '../account/visitor_gate.dart';
 import '../../widgets/secret_tap.dart';
 import '../landing/landing_page.dart';
 import '../../data/role_data.dart';
@@ -80,6 +81,8 @@ class _AppShellState extends State<AppShell> {
       if (mounted) _syncAuto();
     });
     if (app.showLogin) return const AdminLogin();
+    // visitors identify / register at the entrance (front-end demo: account stored on this device)
+    if (app.requireAccount && !app.admin && app.me == null && !app.showLanding) return const VisitorGate();
     if (app.showRoleChooser) return const RoleChooserScreen();
     if (app.admin && app.adminView) return const AdminShell();
     if (app.showLanding) {
@@ -431,7 +434,7 @@ class _AccountChip extends StatelessWidget {
     final app = context.app;
     final me = app.me;
     final active = me?.hasActivePlan == true;
-    final label = me == null ? context.tr('acc_signin') : '@${me.username}';
+    final label = me == null ? (app.admin ? app.adminUser : context.tr('acc_signin')) : '@${me.username}';
     final icon = me == null ? Icons.person_outline_rounded : (active ? Icons.workspace_premium_rounded : Icons.person_rounded);
     void go() => app.goto(navIndex('account'));
     if (compact) return IconButton(tooltip: label, onPressed: go, icon: Icon(icon, color: active ? p.green : p.muted));

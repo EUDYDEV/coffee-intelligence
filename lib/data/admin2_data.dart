@@ -1,4 +1,5 @@
 import '../core/format.dart';
+import '../models/models.dart';
 import 'repository.dart';
 
 /// Front-end only demo data for the administration area (users, sources, flows, quality, KPIs, rules, schedules).
@@ -88,8 +89,8 @@ List<KpiDef> seedKpis() => [
       KpiDef('production', 'kpi_prod', 'kpi_def_prod_d', 'kt', 'production', 'f_monthly', 1000, true, () => repo.africaProduction()),
       KpiDef('exports', 'kpi_exports', 'kpi_def_exports_d', 'kt', 'customs', 'f_monthly', 900, true, () => repo.africaExports()),
       KpiDef('yield', 'kpi_yield', 'kpi_def_yield_d', 'kg/ha', 'production', 'f_monthly', 600, true, () => 1066 / 1830 * 1000),
-      KpiDef('climate', 'kpi_climate', 'kpi_def_climate_d', '/100', 'weather', 'f_1h', 65, false, () => repo.countries(africaOnly: true).fold(0.0, (a, c) => a + c.climateRisk) / 6),
-      KpiDef('cert', 'kpi_def_cert', 'kpi_def_cert_d', '%', 'certs', 'f_quarterly', 25, true, () => repo.countries(africaOnly: true).fold(0.0, (a, c) => a + c.certPct) / 6),
+      KpiDef('climate', 'kpi_climate', 'kpi_def_climate_d', '/100', 'weather', 'f_1h', 65, false, () => _avg((c) => c.climateRisk)),
+      KpiDef('cert', 'kpi_def_cert', 'kpi_def_cert_d', '%', 'certs', 'f_quarterly', 25, true, () => _avg((c) => c.certPct)),
       KpiDef('delay', 'kpi_def_delay', 'kpi_def_delay_d', 'jours', 'ports', 'f_daily', 75, false, () => repo.chain().fold(0.0, (a, s) => a + s.delayDays)),
       KpiDef('quality', 'kpi_def_quality', 'kpi_def_quality_d', '/100', 'coops', 'f_variable', 82, true, () => 83.4),
     ];
@@ -133,7 +134,7 @@ double ruleMetricValue(String m) {
     case 'rain':
       return 82; // % of normal rainfall (demo)
     case 'climate':
-      return repo.countries(africaOnly: true).fold(0.0, (a, c) => a + c.climateRisk) / 6;
+      return _avg((c) => c.climateRisk);
     case 'exports':
       return repo.africaExports();
     case 'delay':
@@ -170,3 +171,9 @@ List<ReportSchedule> seedSchedules() => [
       ReportSchedule('s2', 'monthly', 'monthly', 'board', 'Dr. Kofi Mensah', true),
       ReportSchedule('s3', 'sustain', 'monthly', 'ngo', 'Joseph Okello', false),
     ];
+
+/// Average of a value over the African member countries.
+double _avg(double Function(Country) f) {
+  final af = repo.countries(africaOnly: true);
+  return af.fold(0.0, (a, c) => a + f(c)) / af.length;
+}

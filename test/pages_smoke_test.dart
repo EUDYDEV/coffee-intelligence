@@ -29,7 +29,9 @@ void main() {
   for (final role in publicRoles) {
     for (final entry in sizes.entries) {
       testWidgets('smoke ${role.id} @ ${entry.key}: every page renders without errors/overflow', (t) async {
-        final s = AppState()..showLanding = false;
+        final s = AppState()
+          ..showLanding = false
+          ..requireAccount = false;
         final seen = <String>{};
         final old = FlutterError.onError;
         var where = '';

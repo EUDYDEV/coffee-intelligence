@@ -22,4 +22,8 @@ const portExit = <String, List<double>>{
   'DAR': [54, -8],
   'ABJ': [-16, 3],
   'SPY': [-16, 2],
+  'DLA': [-16, -1],
+  'CKY': [-20, 8],
+  'LFW': [-16, 0],
+  'TMM': [56, -18],
 };

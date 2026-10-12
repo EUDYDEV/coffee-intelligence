@@ -4,6 +4,7 @@ import '../../core/format.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/repository.dart';
 import '../../widgets/charts.dart';
+import '../../widgets/country_picker.dart';
 import '../../widgets/common.dart';
 import '../../widgets/layout.dart';
 
@@ -23,18 +24,7 @@ class RevenuePage extends StatelessWidget {
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       PageHeader('revenue_title', 'revenue_sub'),
-      Reveal(
-        child: Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final x in af)
-            ChoiceChip(
-              label: Text('${x.flag} ${context.tr(x.nameKey)}'),
-              selected: x.id == c.id,
-              onSelected: (_) => app.selectCountry(x.id),
-              selectedColor: p.accent.withValues(alpha: .25),
-              showCheckmark: false,
-            ),
-        ]),
-      ),
+      Reveal(child: CountryPicker(value: c.id, onChanged: (v) => app.selectCountry(v ?? c.id))),
       gap16,
       Grid(columns: context.cols(desktop: 4, tablet: 2, mobile: 2), gap: 12, children: [
         KpiCard(labelKey: 'farmgate', metric: 'price_arabica', value: c.farmgateKg, decimals: 2, unit: '\$/kg', icon: Icons.sell_rounded, trend: 2.4),

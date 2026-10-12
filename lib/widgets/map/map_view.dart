@@ -308,7 +308,7 @@ class _MapPainter extends CustomPainter {
         final pc = pr(c.lon, c.lat);
         final col = Color.lerp(p.green, p.alert, ((c.climateRisk - 45) / 30).clamp(0.0, 1.0))!;
         final pulse = (time * 3) % 1;
-        final r = (22 + c.climateRisk * .35) * zoom.clamp(1.0, 3.0);
+        final r = (c.prodKt >= 25 ? 22 + c.climateRisk * .35 : 10 + c.climateRisk * .15) * zoom.clamp(1.0, 3.0);
         canvas.drawCircle(pc, r, Paint()..color = col.withValues(alpha: .13 * clA));
         canvas.drawCircle(pc, r * (.6 + .6 * pulse), Paint()..color = col.withValues(alpha: .5 * (1 - pulse) * clA)..style = PaintingStyle.stroke..strokeWidth = 1.6);
       }
@@ -332,7 +332,7 @@ class _MapPainter extends CustomPainter {
     if (dfA > 0) {
       for (final c in af) {
         final pc = pr(c.lon, c.lat);
-        final n = (c.deforestRisk / 4).round();
+        final n = (c.deforestRisk / (c.prodKt >= 25 ? 4 : 9)).round();
         for (var i = 0; i < n; i++) {
           final a = i * 2.17 + c.lon, d = (10 + (i * 7) % 26) * zoom.clamp(1.0, 3.0);
           canvas.drawCircle(pc + Offset(math.cos(a), math.sin(a)) * d, 2.4, Paint()..color = p.alert.withValues(alpha: .75 * dfA));
@@ -404,7 +404,7 @@ class _MapPainter extends CustomPainter {
     if (ceA > 0) {
       for (final c in af) {
         final pc = pr(c.lon, c.lat);
-        final r = 25.0 * zoom.clamp(1.0, 2.2);
+        final r = (c.prodKt >= 25 ? 25.0 : 14.0) * zoom.clamp(1.0, 2.2);
         final rect = Rect.fromCircle(center: pc, radius: r);
         canvas.drawArc(rect, 0, math.pi * 2, false, Paint()..color = p.border.withValues(alpha: ceA)..style = PaintingStyle.stroke..strokeWidth = 5);
         canvas.drawArc(rect, -math.pi / 2, math.pi * 2 * c.certPct / 100, false, Paint()..color = p.green.withValues(alpha: ceA)..style = PaintingStyle.stroke..strokeWidth = 5..strokeCap = StrokeCap.round);
@@ -421,11 +421,15 @@ class _MapPainter extends CustomPainter {
         final pulse = (time * 5) % 1;
         canvas.drawCircle(pc, 12 + 18 * pulse, Paint()..color = p.gold.withValues(alpha: .5 * (1 - pulse)));
       }
-      final r = (sel ? 9.0 : (hov ? 8.0 : 6.5)) * a;
+      final major = c.prodKt >= 25;
+      final r = (sel ? 9.0 : (hov ? 8.0 : (major ? 6.5 : 4.6))) * a;
       canvas.drawCircle(pc, r + 3, Paint()..color = (p.dark ? CI.cream : CI.espressoDeep).withValues(alpha: .15 * a));
       canvas.drawCircle(pc, r, Paint()..color = sel ? p.gold : p.accent);
-      canvas.drawCircle(pc, r, Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 2);
-      _label(canvas, names[c.id] ?? c.id, pc + Offset(0, -r - 11), p.text.withValues(alpha: a), sel ? 12.5 : 11.5, bold: true);
+      canvas.drawCircle(pc, r, Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = major ? 2 : 1.5);
+      // 25 member countries: names of the main producers always, the others when zoomed in, hovered or selected
+      if (major || sel || hov || zoom >= 1.8) {
+        _label(canvas, names[c.id] ?? c.id, pc + Offset(0, -r - 11), p.text.withValues(alpha: a), sel ? 12.5 : (major ? 11.5 : 10), bold: major || sel || hov);
+      }
     }
   }
 

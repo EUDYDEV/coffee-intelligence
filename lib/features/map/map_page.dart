@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../data/repository.dart';
 import '../../widgets/common.dart';
 import '../../widgets/layout.dart';
+import '../../widgets/country_picker.dart';
 import '../../widgets/map/map_view.dart';
 
 class MapPage extends StatefulWidget {
@@ -51,10 +52,12 @@ class _MapPageState extends State<MapPage> {
           const SizedBox(width: 10),
           Expanded(child: Text(context.tr(c.nameKey), style: TS.h2(p))),
         ]),
-        const SizedBox(height: 14),
-        _kv(context, 'kpi_prod', '${Fmt.num(c.prodKt, 0)} kt'),
+        const SizedBox(height: 12),
+        CountryPicker(value: c.id, onChanged: (v) => app.selectCountry(v ?? c.id)),
+        const SizedBox(height: 10),
+        _kv(context, 'kpi_prod', '${Fmt.num(c.prodKt, c.prodKt < 10 ? 1 : 0)} kt'),
         _kv(context, 'kpi_yield', '${Fmt.num(c.yieldKgHa, 0)} kg/ha'),
-        _kv(context, 'kpi_exports', '${Fmt.num(c.exportsKt, 0)} kt'),
+        _kv(context, 'kpi_exports', '${Fmt.num(c.exportsKt, c.exportsKt < 10 ? 1 : 0)} kt'),
         _kv(context, 'kpi_climate', '${Fmt.num(c.climateRisk, 0)}/100'),
         _kv(context, 'certified', Fmt.pct(c.certPct, 0)),
         _kv(context, 'sd_forest', '${Fmt.num(100 - c.deforestRisk, 0)}/100'),

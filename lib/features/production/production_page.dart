@@ -155,7 +155,7 @@ class _CountryPanel extends StatelessWidget {
                       builder: (_, v, __) => LinearProgressIndicator(value: v / .45, minHeight: 9, borderRadius: BorderRadius.circular(5), color: p.green, backgroundColor: p.border),
                     ),
                   ),
-                  SizedBox(width: 56, child: Text('${Fmt.num(c.prodKt * r.share, 0)} kt', textAlign: TextAlign.right, style: TextStyle(color: p.muted, fontSize: 12))),
+                  SizedBox(width: 56, child: Text('${Fmt.num(c.prodKt * r.share, c.prodKt < 10 ? 1 : 0)} kt', textAlign: TextAlign.right, style: TextStyle(color: p.muted, fontSize: 12))),
                 ]),
               ),
             const Divider(height: 28),

@@ -3,6 +3,8 @@ import 'package:coffee_intelligence/app/app_state.dart';
 import 'package:coffee_intelligence/data/account_data.dart';
 import 'package:coffee_intelligence/features/account/account_page.dart';
 import 'package:coffee_intelligence/features/account/account_widgets.dart';
+import 'package:coffee_intelligence/features/shell/app_shell.dart';
+import 'package:coffee_intelligence/features/shell/nav.dart';
 import 'package:coffee_intelligence/widgets/export_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -237,6 +239,31 @@ void main() {
       s.subscribe('pro', 'year', 'card');
       await pump(const SingleChildScrollView(child: AccountPage()));
       await pump(const SingleChildScrollView(child: AccountPage()));
+    });
+  }
+
+  for (final e in {'phone': const Size(360, 780), 'tablet': const Size(820, 1180)}.entries) {
+    testWidgets('entrance: visitor identifies, chooses a profile, then enters the platform @ ${e.key}', (t) async {
+      t.view.physicalSize = e.value;
+      t.view.devicePixelRatio = 1;
+      AppState.pageIds = navItems.map((n) => n.id).toList();
+      final s = AppState()
+        ..showLanding = false
+        ..accountsReady = true;
+      await t.pumpWidget(AppScope(state: s, child: MaterialApp(home: const AppShell())));
+      await t.pump(const Duration(seconds: 1));
+      expect(find.text('Identification du visiteur'), findsOneWidget);
+      expect(find.text('Centre de décision'), findsNothing, reason: 'dashboard not reachable before identification');
+      await t.tap(find.text('Continuer avec Google'));
+      await t.pump(const Duration(seconds: 1));
+      expect(find.text('Choisissez votre profil'), findsOneWidget);
+      s.setRole('coop');
+      await t.pump(const Duration(seconds: 2));
+      expect(find.text('Identification du visiteur'), findsNothing);
+      expect(s.me, isNotNull);
+      s.logoutVisitor();
+      await t.pump(const Duration(seconds: 1));
+      expect(find.text('Identification du visiteur'), findsOneWidget, reason: 'sign-out returns to the entrance');
     });
   }
 }

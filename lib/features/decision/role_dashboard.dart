@@ -126,7 +126,7 @@ List<Widget> roleKpis(BuildContext context) {
         k('rk_deforest', avg((c) => c.deforestRisk), '/100', Icons.forest_rounded, trend: 2.4, inv: true),
         k('rk_emissions', avg((c) => sustainFor(c).emissions), '/100', Icons.cloud_rounded, trend: .8),
         k('sustain_index', af.fold(0.0, (a, c) => a + sustainFor(c).overall) / af.length, '/100', Icons.eco_rounded, trend: 1.1, metric: 'sustain'),
-        k('rk_risk_zones', af.where((c) => c.climateRisk > 62 || c.deforestRisk > 45).length.toDouble(), '/ 6', Icons.crisis_alert_rounded, trend: 16.0, inv: true),
+        k('rk_risk_zones', af.where((c) => c.climateRisk > 62 || c.deforestRisk > 45).length.toDouble(), '/ ${af.length}', Icons.crisis_alert_rounded, trend: 16.0, inv: true),
       ];
     default: // national board
       final c = countryById(app.myCountry);
@@ -300,7 +300,8 @@ class StockCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
-    final rows = repo.stocks();
+    final all = [...repo.stocks()]..sort((a, b) => b.exportedKt.compareTo(a.exportedKt));
+    final rows = all.take(8).toList(); // main origins; the full table (25 countries) is in the CSV export and Administration > Data
     return GlassCard(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         SectionLabel(context.tr('stk_title')),
@@ -323,15 +324,16 @@ class StockCard extends StatelessWidget {
               for (final r in rows)
                 DataRow(cells: [
                   DataCell(Text(context.tr('c_${r.country}'), style: TextStyle(color: p.text, fontWeight: FontWeight.w600))),
-                  DataCell(Text('${Fmt.num(r.availableKt, 1)} kt', style: TextStyle(color: p.green, fontWeight: FontWeight.w700))),
+                  DataCell(Text('${Fmt.num(r.availableKt, r.availableKt < 1 ? 2 : 1)} kt', style: TextStyle(color: p.green, fontWeight: FontWeight.w700))),
                   DataCell(Text('${Fmt.num(r.reservedKt, 1)} kt', style: TextStyle(color: p.gold, fontWeight: FontWeight.w700))),
                   DataCell(Text('${Fmt.num(r.transitKt, 1)} kt', style: TextStyle(color: p.accent, fontWeight: FontWeight.w700))),
-                  DataCell(Text('${Fmt.num(r.exportedKt, 0)} kt/${context.tr('y')}', style: TextStyle(color: p.muted))),
+                  DataCell(Text('${Fmt.num(r.exportedKt, r.exportedKt < 10 ? 1 : 0)} kt/${context.tr('y')}', style: TextStyle(color: p.muted))),
                   DataCell(Text('${Fmt.num(r.capacityFreeKt, 1)} kt', style: TextStyle(color: p.text))),
                 ]),
             ],
           ),
         ),
+        Text(context.tr('stk_top', [rows.length, all.length]), style: TS.bodyS(p).copyWith(fontSize: 11, fontWeight: FontWeight.w600)),
         Text(context.tr('stk_note'), style: TS.bodyS(p).copyWith(fontSize: 11)),
       ]),
     );

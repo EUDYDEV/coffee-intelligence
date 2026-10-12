@@ -373,7 +373,7 @@ class _PlanPickerState extends State<PlanPicker> {
         selected: current,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            Text(context.tr(d.nameKey), style: TS.h2(p)),
+            FittedBox(fit: BoxFit.scaleDown, child: Text(context.tr(d.nameKey), maxLines: 1, style: TS.h2(p))),
             if (featured) Chip2(context.tr('plan_popular'), p.gold),
             if (current) Chip2(context.tr('plan_current'), p.green),
           ]),
@@ -382,11 +382,10 @@ class _PlanPickerState extends State<PlanPicker> {
           const SizedBox(height: 12),
           if (d.monthUsd == 0)
             Text(context.tr('plan_free_price'), style: TS.h1(p).copyWith(fontSize: 26))
-          else
-            Wrap(crossAxisAlignment: WrapCrossAlignment.end, spacing: 6, children: [
-              Text(Fmt.usd(price, 0), style: TS.h1(p).copyWith(fontSize: 26)),
-              Padding(padding: const EdgeInsets.only(bottom: 4), child: Text(context.tr(_cycle == 'year' ? 'plan_per_year' : 'plan_per_month'), style: TS.bodyS(p))),
-            ]),
+          else ...[
+            FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(Fmt.usd(price, 0), maxLines: 1, style: TS.h1(p).copyWith(fontSize: 26))),
+            Text(context.tr(_cycle == 'year' ? 'plan_per_year' : 'plan_per_month'), style: TS.bodyS(p)),
+          ],
           const SizedBox(height: 12),
           for (final f in d.featureKeys)
             Padding(

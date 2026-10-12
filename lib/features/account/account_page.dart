@@ -53,21 +53,21 @@ class AccountPage extends StatelessWidget {
     ]);
 
     if (me == null) {
-      final auth = GlassCard(
+      // only reachable by the demo administrator (visitors sign in at the entrance)
+      final note = GlassCard(
         accent: p.gold,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(context.tr('acc_welcome'), style: TS.h2(p)),
-          const SizedBox(height: 4),
-          Text(context.tr('acc_welcome_d'), style: TS.bodyS(p)),
-          const SizedBox(height: 14),
-          AuthPanel(onAuthed: () {}),
+        child: Row(children: [
+          Icon(Icons.admin_panel_settings_rounded, color: p.gold),
+          const SizedBox(width: 12),
+          Expanded(child: Text(context.tr(app.admin ? 'acc_admin_note' : 'acc_welcome_d'), style: TS.bodyS(p).copyWith(color: p.text))),
         ]),
       );
       return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const PageHeader('acc_title', 'acc_sub', exportId: ''),
-        if (wide)
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(flex: 5, child: auth), const SizedBox(width: 20), Expanded(flex: 6, child: plansBlock)])
-        else ...[auth, const SizedBox(height: 22), plansBlock],
+        note,
+        if (!app.admin) ...[const SizedBox(height: 16), GlassCard(child: AuthPanel(onAuthed: () {}))],
+        const SizedBox(height: 22),
+        plansBlock,
       ]);
     }
 

@@ -66,7 +66,7 @@ ExportDoc buildExport(String pageId, String Function(String, [List<Object>]) t) 
     case 'compare':
       return ExportDoc(title, [t('compare_sub')], [
         ExportSection(title, [t('col_country'), t('cmp_prod'), t('cmp_yield'), t('cmp_income'), t('cmp_cost'), t('cmp_cert'), t('ql_score')], [
-          for (final c in repo.countries()) [t(c.nameKey), Fmt.num(c.prodKt, 0), Fmt.num(c.yieldKgHa, 0), Fmt.money(c.incomeYr, 0), Fmt.money(c.costKg, 2), Fmt.num(c.certPct, 0), Fmt.num(qualityFor(c.id).score, 1)]
+          for (final c in repo.countries()) [t(c.nameKey), Fmt.num(c.prodKt, c.prodKt < 10 ? 1 : 0), Fmt.num(c.yieldKgHa, 0), Fmt.money(c.incomeYr, 0), Fmt.money(c.costKg, 2), Fmt.num(c.certPct, 0), Fmt.num(qualityFor(c.id).score, 1)]
         ])
       ]);
     case 'alerts':

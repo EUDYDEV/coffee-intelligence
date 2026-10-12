@@ -7,6 +7,7 @@ import '../../data/demo/cert_weather_data.dart';
 import '../../data/demo/countries_data.dart';
 import '../../data/repository.dart';
 import '../../widgets/charts.dart';
+import '../../widgets/country_picker.dart';
 import '../../widgets/common.dart';
 import '../../widgets/layout.dart';
 
@@ -45,8 +46,7 @@ class _ClimateViewState extends State<ClimateView> {
     final nObs = shown.length;
 
     final selector = Wrap(spacing: 10, runSpacing: 10, crossAxisAlignment: WrapCrossAlignment.center, children: [
-      for (final c in af)
-        ChoiceChip(label: Text('${c.flag} ${context.tr(c.nameKey)}'), selected: c.id == _country, showCheckmark: false, selectedColor: p.accent.withValues(alpha: .28), onSelected: (_) => setState(() => _country = c.id)),
+      CountryPicker(value: _country, onChanged: (v) => setState(() => _country = v ?? _country)),
       Segmented<int>(values: const [12, 24], selected: _months, label: (v) => '$v ${context.tr('m')}', onChanged: (v) => setState(() => _months = v)),
       Segmented<bool>(values: const [false, true], selected: _imperial, label: (v) => v ? 'in / °F' : 'mm / °C', onChanged: (v) => setState(() => _imperial = v)),
     ]);

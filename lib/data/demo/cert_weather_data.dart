@@ -80,6 +80,28 @@ const _clim = {
   'RWA': _Climate(19.0, 110, 70, 1.0),
   'TZA': _Climate(21.0, 100, 80, 1.5),
   'CIV': _Climate(26.5, 120, 90, 1.6),
+  // West Africa (rainy season mid-year)
+  'GIN': _Climate(26.0, 170, 150, -1.4),
+  'SLE': _Climate(26.5, 200, 170, -1.4),
+  'LBR': _Climate(26.0, 190, 150, -1.4),
+  'GHA': _Climate(27.0, 110, 70, -1.3),
+  'TGO': _Climate(27.0, 105, 70, -1.3),
+  'BEN': _Climate(27.5, 100, 75, -1.3),
+  'NGA': _Climate(26.5, 115, 90, -1.4),
+  // Central Africa (humid, two rainy seasons)
+  'CMR': _Climate(24.0, 145, 80, -1.0),
+  'CAF': _Climate(25.5, 125, 85, -1.2),
+  'GNQ': _Climate(25.0, 165, 70, .3),
+  'GAB': _Climate(25.5, 160, 80, .8),
+  'COG': _Climate(25.5, 140, 75, .9),
+  'COD': _Climate(24.0, 135, 55, .9),
+  'BDI': _Climate(20.0, 100, 65, 1.1),
+  // Southern Africa and Madagascar (rainy season around January)
+  'AGO': _Climate(22.5, 95, 90, 1.5),
+  'ZMB': _Climate(21.5, 85, 95, 1.5),
+  'MWI': _Climate(22.0, 95, 95, 1.5),
+  'ZWE': _Climate(20.5, 70, 80, 1.5),
+  'MDG': _Climate(23.5, 150, 110, 1.5),
 };
 
 /// 24 months of history (+6 forecast months) of weather for a country.

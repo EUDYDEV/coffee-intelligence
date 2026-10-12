@@ -20,7 +20,9 @@ void main() {
       testWidgets('$screen @ ${e.key}', (t) async {
         t.view.physicalSize = e.value;
         t.view.devicePixelRatio = 1;
-        final s = AppState()..showLanding = false;
+        final s = AppState()
+          ..showLanding = false
+          ..requireAccount = false;
         final errs = <String>[];
         final old = FlutterError.onError;
         FlutterError.onError = (d) => errs.add('${d.exceptionAsString().split('\n').first} @ ${RegExp(r'lib/[^\s:]*\.dart:\d+').firstMatch(d.toString())?.group(0)}');

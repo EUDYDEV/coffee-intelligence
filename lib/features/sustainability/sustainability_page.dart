@@ -6,6 +6,7 @@ import '../../core/theme/palette.dart';
 import '../../data/demo/sustainability_data.dart';
 import '../../data/repository.dart';
 import '../../widgets/charts.dart';
+import '../../widgets/country_picker.dart';
 import '../../widgets/common.dart';
 import '../../widgets/layout.dart';
 
@@ -31,12 +32,7 @@ class SustainabilityPage extends StatelessWidget {
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       PageHeader('sustain_title', 'sustain_sub'),
-      Reveal(
-        child: Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final x in af)
-            ChoiceChip(label: Text('${x.flag} ${context.tr(x.nameKey)}'), selected: x.id == c.id, onSelected: (_) => app.selectCountry(x.id), selectedColor: p.green.withValues(alpha: .3), showCheckmark: false),
-        ]),
-      ),
+      Reveal(child: CountryPicker(value: c.id, onChanged: (v) => app.selectCountry(v ?? c.id))),
       gap16,
       TwoCol(
         flexL: 4,
@@ -138,8 +134,6 @@ class SustainabilityPage extends StatelessWidget {
             SectionLabel(context.tr('sustain_compare')),
             BarChartW(
                 sourceId: 'certs', unit: '/100',height: 230, fmt: (v) => Fmt.num(v, 0), selected: af.indexWhere((x) => x.id == c.id), onTap: (i) => app.selectCountry(af[i].id), items: [for (final x in af) BarItem(x.id, sustainFor(x).overall, p.green)]),
-            const SizedBox(height: 6),
-            Wrap(children: [for (final x in af) Padding(padding: const EdgeInsets.only(right: 12), child: Text('${x.id}: ${Fmt.pct(x.certPct, 0)} ${context.tr('certified')}', style: TS.bodyS(p).copyWith(fontSize: 11.5)))]),
           ]),
         ),
       ),

@@ -76,10 +76,10 @@ class RoleChooserScreen extends StatelessWidget {
                   const SizedBox(height: 22),
                   Text(context.tr('role_choose_title'), textAlign: TextAlign.center, style: const TextStyle(fontFamily: TS.display, color: CI.cream, fontSize: 30, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 6),
-                  Text(context.tr('role_choose_sub', [app.adminUser]), textAlign: TextAlign.center, style: TextStyle(color: CI.cream.withValues(alpha: .7), fontSize: 14)),
+                  Text(context.tr('role_choose_sub', [app.admin ? app.adminUser : (app.me?.fullName ?? '')]), textAlign: TextAlign.center, style: TextStyle(color: CI.cream.withValues(alpha: .7), fontSize: 14)),
                   const SizedBox(height: 22),
                   Grid(columns: context.cols(desktop: 3, tablet: 2, mobile: 1), gap: 12, children: [
-                    for (final r in roles)
+                    for (final r in app.admin ? roles : publicRoles)
                       GestureDetector(
                         onTap: () => app.setRole(r.id),
                         child: MouseRegion(
@@ -104,7 +104,7 @@ class RoleChooserScreen extends StatelessWidget {
                   ]),
                   const SizedBox(height: 18),
                   Text(context.tr('role_sim_note'), textAlign: TextAlign.center, style: TextStyle(color: CI.cream.withValues(alpha: .6), fontSize: 11.5)),
-                  TextButton(onPressed: app.logout, child: Text(context.tr('adm_logout'), style: const TextStyle(color: CI.gold))),
+                  TextButton(onPressed: app.admin ? app.logout : app.logoutVisitor, child: Text(context.tr(app.admin ? 'adm_logout' : 'acc_logout'), style: const TextStyle(color: CI.gold))),
                 ]),
               ),
             ),

@@ -6,6 +6,7 @@ import '../../core/theme/palette.dart';
 import '../../data/demo/cert_weather_data.dart';
 import '../../data/repository.dart';
 import '../../widgets/charts.dart';
+import '../../widgets/country_picker.dart';
 import '../../widgets/common.dart';
 import '../../widgets/layout.dart';
 
@@ -124,10 +125,7 @@ class _CertsPageState extends State<CertsPage> {
             const Divider(height: 24),
             Text(context.tr('cert_filters').toUpperCase(), style: TS.label(p)),
             const SizedBox(height: 8),
-            Wrap(spacing: 6, runSpacing: 6, children: [
-              ChoiceChip(label: Text(context.tr('cat_all')), selected: _country == null, onSelected: (_) => setState(() => _country = null), showCheckmark: false),
-              for (final c in af) ChoiceChip(label: Text(c.id), selected: _country == c.id, onSelected: (_) => setState(() => _country = _country == c.id ? null : c.id), showCheckmark: false),
-            ]),
+            CountryPicker(value: _country, allowAll: true, onChanged: (v) => setState(() => _country = v)),
           ]),
         ),
       ),

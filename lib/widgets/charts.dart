@@ -437,20 +437,25 @@ class _BarChartWState extends State<BarChartW> with SingleTickerProviderStateMix
     return SizedBox(
       height: widget.height,
       child: LayoutBuilder(builder: (_, c) {
-        return GestureDetector(
+        // many bars (e.g. the 25 member countries): keep a readable width per bar and scroll horizontally
+        const minSlot = 34.0;
+        final width = math.max(c.maxWidth, widget.items.length * minSlot + 16);
+        final chart = GestureDetector(
           onTapDown: (d) {
             if (widget.onTap == null) return;
             const l = 8.0;
-            final slot = (c.maxWidth - 2 * l) / widget.items.length;
+            final slot = (width - 2 * l) / widget.items.length;
             final i = ((d.localPosition.dx - l) / slot).floor();
             if (i >= 0 && i < widget.items.length) widget.onTap!(i);
           },
           child: AnimatedBuilder(
             animation: _c,
-            builder: (_, __) => CustomPaint(
-                size: Size(c.maxWidth, widget.height),
-                painter: _BarPainter(widget, p, _c.value)),
+            builder: (_, __) => CustomPaint(size: Size(width, widget.height), painter: _BarPainter(widget, p, _c.value)),
           ),
+        );
+        if (width <= c.maxWidth) return chart;
+        return Scrollbar(
+          child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: SizedBox(width: width, height: widget.height, child: chart)),
         );
       }),
     );

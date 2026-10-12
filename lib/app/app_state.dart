@@ -150,6 +150,14 @@ class AppState extends ChangeNotifier {
   String? pendingEmail; // account waiting for its (simulated) e-mail verification code
   String? pendingCode;
   bool persistAccounts = false; // set by main(); tests keep everything in memory
+  bool requireAccount = true; // visitors identify / register before entering the platform (?skipgate=1 for automated tests)
+  bool accountsReady = false; // saved accounts restored from this device
+
+  /// After sign-up / sign-in at the entrance: choose a profile, then the platform opens.
+  void enterAfterAuth() {
+    showRoleChooser = true;
+    notifyListeners();
+  }
 
   /// Free browsing for everyone; downloads need an active subscription (the demo admin is never blocked).
   bool get canDownload => admin || (me?.hasActivePlan ?? false);
@@ -169,6 +177,7 @@ class AppState extends ChangeNotifier {
     } catch (_) {
       persistAccounts = false;
     }
+    accountsReady = true;
     notifyListeners();
   }
 
@@ -296,6 +305,8 @@ class AppState extends ChangeNotifier {
 
   void logoutVisitor() {
     me = null;
+    page = 0;
+    showRoleChooser = false;
     _saveAccounts();
     notifyListeners();
   }
@@ -402,6 +413,7 @@ class AppState extends ChangeNotifier {
       if (c != null) Fmt.cur = c;
     }
     if (q['enter'] == '1') showLanding = false;
+    if (q['skipgate'] == '1') requireAccount = false;
     if (q['admin'] == '1') {
       admin = true;
       showLanding = false;
