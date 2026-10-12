@@ -52,6 +52,27 @@ class AccountPage extends StatelessWidget {
       ),
     ]);
 
+    if (app.partner) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const PageHeader('acc_title', 'acc_sub', exportId: ''),
+        GlassCard(
+          accent: p.green,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Icon(Icons.handshake_rounded, color: p.green, size: 30),
+              const SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(app.partnerOrg, style: TS.h2(p)), Text(context.tr('user_partner'), style: TS.bodyS(p))])),
+              Chip2(context.tr(app.roleDef.nameKey), app.roleDef.color, icon: app.roleDef.icon),
+            ]),
+            const SizedBox(height: 14),
+            Text(context.tr('partner_account_d'), style: TS.bodyS(p).copyWith(color: p.text)),
+            const SizedBox(height: 14),
+            PrimaryButton(context.tr('acc_logout'), icon: Icons.logout_rounded, outlined: true, onTap: app.logoutAll),
+          ]),
+        ),
+      ]);
+    }
+
     if (me == null) {
       // only reachable by the demo administrator (visitors sign in at the entrance)
       final note = GlassCard(
@@ -83,13 +104,14 @@ class AccountPage extends StatelessWidget {
         ]),
         const Divider(height: 26),
         _kv(context, Icons.mail_outline_rounded, context.tr('acc_email'), me.email),
-        _kv(context, Icons.public_rounded, context.tr('acc_country'), '${context.tr('mc_${me.country}')}${me.city.isEmpty ? '' : ' · ${me.city}'}'),
         if (me.address.isNotEmpty) _kv(context, Icons.home_outlined, context.tr('acc_address'), me.address),
+        _kv(context, Icons.public_rounded, context.tr('acc_country'), '${memberCountries.contains(me.country) ? context.tr('mc_${me.country}') : me.country}${me.city.isEmpty ? '' : ' · ${me.city}'}'),
+        if (me.geoCountry.isNotEmpty || me.geoCity.isNotEmpty) _kv(context, Icons.travel_explore_rounded, context.tr('acc_sec_geo'), [me.geoCountry, me.geoCity].where((x) => x.isNotEmpty).join(' · ')),
         _kv(context, Icons.cake_outlined, context.tr('acc_birth'), _date(me.birth)),
         _kv(context, Icons.person_outline_rounded, context.tr('acc_gender'), context.tr('gender_${me.gender}')),
         _kv(context, Icons.event_available_rounded, context.tr('acc_since'), _date(me.created)),
         const SizedBox(height: 10),
-        Align(alignment: Alignment.centerLeft, child: PrimaryButton(context.tr('acc_logout'), icon: Icons.logout_rounded, outlined: true, onTap: app.logoutVisitor)),
+        Align(alignment: Alignment.centerLeft, child: PrimaryButton(context.tr('acc_logout'), icon: Icons.logout_rounded, outlined: true, onTap: app.logoutAll)),
       ]),
     );
     final status = GlassCard(

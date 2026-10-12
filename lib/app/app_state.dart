@@ -28,7 +28,7 @@ class AppState extends ChangeNotifier {
   GlobalKey exportKey = GlobalKey(); // page content captured for PNG export
 
   // ---- simulated profile (role) ----
-  String role = 'board';
+  String role = 'public';
   String myCoop = 'c2'; // cooperative of the "farmer / cooperative" profile
   String myCountry = 'CIV'; // country of the "national board" profile
   String productionTab = 'production'; // production | quality | climate
@@ -46,6 +46,8 @@ class AppState extends ChangeNotifier {
   bool isRestricted(String pageId) => roleDef.restricted.contains(pageId);
 
   void setRole(String id, {bool go = true}) {
+    // partner spaces are private: only partners (or the demo admin) can open them
+    if (requireAccount && isPartnerSpace(id) && !partner && !admin) return;
     role = id;
     guideDone.add('gc_profile');
     final r = roleById(id);
@@ -155,12 +157,42 @@ class AppState extends ChangeNotifier {
 
   /// After sign-up / sign-in at the entrance: choose a profile, then the platform opens.
   void enterAfterAuth() {
-    showRoleChooser = true;
-    notifyListeners();
+    // public users go straight to the public space (partner spaces are private)
+    partner = false;
+    setRole('public');
   }
 
   /// Free browsing for everyone; downloads need an active subscription (the demo admin is never blocked).
-  bool get canDownload => admin || (me?.hasActivePlan ?? false);
+  bool get canDownload => admin || partner || (me?.hasActivePlan ?? false);
+
+  // ---- partner users (private spaces) — front-end demo: any credentials are accepted ----
+  bool partner = false;
+  String partnerOrg = '';
+  bool gatePartnerTab = false; // open the entrance on the partner tab
+
+  void loginPartner(String org, String id) {
+    partner = true;
+    partnerOrg = org.trim().isEmpty ? (id.trim().isEmpty ? 'Organisation partenaire (démo)' : id.trim()) : org.trim();
+    me = null;
+    showLanding = false;
+    showRoleChooser = true; // choose the partner space
+    addLog('log_partner_in', partnerOrg);
+    _saveAccounts();
+    notifyListeners();
+  }
+
+  /// Signs out a public user or a partner and goes back to the entrance.
+  void logoutAll({bool toPartner = false}) {
+    me = null;
+    partner = false;
+    partnerOrg = '';
+    role = 'public';
+    page = 0;
+    showRoleChooser = false;
+    gatePartnerTab = toPartner;
+    _saveAccounts();
+    notifyListeners();
+  }
 
   Future<void> loadAccounts() async {
     try {
@@ -173,6 +205,13 @@ class AppState extends ChangeNotifier {
       }
       final sid = sp.getString('oiac_session');
       me = sid == null ? null : accounts.where((a) => a.id == sid && a.verified).firstOrNull;
+      final po = sp.getString('oiac_partner');
+      if (me == null && po != null) {
+        partner = true;
+        partnerOrg = po;
+        final pr = sp.getString('oiac_partner_role');
+        if (pr != null && isPartnerSpace(pr)) role = pr;
+      }
       persistAccounts = true;
     } catch (_) {
       persistAccounts = false;
@@ -191,6 +230,13 @@ class AppState extends ChangeNotifier {
       } else {
         await sp.setString('oiac_session', me!.id);
       }
+      if (partner) {
+        await sp.setString('oiac_partner', partnerOrg);
+        await sp.setString('oiac_partner_role', role);
+      } else {
+        await sp.remove('oiac_partner');
+        await sp.remove('oiac_partner_role');
+      }
     } catch (_) {}
   }
 
@@ -207,6 +253,8 @@ class AppState extends ChangeNotifier {
     required String address,
     required DateTime birth,
     required String gender,
+    String geoCountry = '',
+    String geoCity = '',
   }) {
     final mail = email.trim().toLowerCase();
     if (_byEmail(mail) != null) return 'acc_err_email_taken';
@@ -225,6 +273,8 @@ class AppState extends ChangeNotifier {
       gender: gender,
       birth: birth,
       created: DateTime.now(),
+      geoCountry: geoCountry,
+      geoCity: geoCity,
     ));
     pendingEmail = mail;
     pendingCode = newCode();
@@ -255,17 +305,34 @@ class AppState extends ChangeNotifier {
     return null;
   }
 
-  /// Sign in with e-mail or username + password. Returns an error key, or null when OK.
+  /// Sign in with e-mail or username. Front-end demo: always accepted — an unknown identifier opens a demo account.
   String? loginVisitor(String id, String password) {
     final k = id.trim().toLowerCase();
-    final a = accounts.where((x) => x.email == k || x.username.toLowerCase() == k).firstOrNull;
-    if (a == null || a.social != null && password.isEmpty) return 'acc_err_login';
-    if (hashPassword(password, a.salt) != a.passHash) return 'acc_err_login';
-    if (!a.verified) {
-      resendCode(a.email);
-      return 'acc_err_unverified';
+    var a = k.isEmpty ? null : accounts.where((x) => x.email == k || x.username.toLowerCase() == k).firstOrNull;
+    if (a == null) {
+      final user = k.isEmpty ? 'visiteur' : (k.contains('@') ? k.split('@').first : k);
+      final salt = newSalt();
+      a = Account(
+        id: newId('u'),
+        fullName: user.isEmpty ? 'Visiteur' : '${user[0].toUpperCase()}${user.substring(1)}',
+        username: accounts.any((x) => x.username.toLowerCase() == user) ? '${user}_${accounts.length + 1}' : user,
+        email: validEmail(k) ? k : '$user@demo.oiac',
+        passHash: hashPassword(password, salt),
+        salt: salt,
+        country: 'CIV',
+        city: '',
+        address: '',
+        gender: 'n',
+        birth: DateTime(1990, 1, 1),
+        created: DateTime.now(),
+        verified: true,
+      );
+      accounts.add(a);
     }
+    a.verified = true;
     me = a;
+    partner = false;
+    guideDone.add('gc_account');
     addLog('log_visitor_in', a.email);
     _saveAccounts();
     notifyListeners();
@@ -303,13 +370,7 @@ class AppState extends ChangeNotifier {
     return a;
   }
 
-  void logoutVisitor() {
-    me = null;
-    page = 0;
-    showRoleChooser = false;
-    _saveAccounts();
-    notifyListeners();
-  }
+  void logoutVisitor() => logoutAll();
 
   /// Simulated payment of a subscription (no money moves).
   void subscribe(String planId, String cycle, String method) {

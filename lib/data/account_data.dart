@@ -55,6 +55,7 @@ class Purchase {
 class Account {
   final String id;
   String fullName, username, email, passHash, salt, country, city, address, gender;
+  String geoCountry, geoCity; // approximate geolocation detected at sign-up
   DateTime birth;
   bool verified;
   String? social; // google | apple (simulated sign-in)
@@ -77,6 +78,8 @@ class Account {
     required this.gender,
     required this.birth,
     required this.created,
+    this.geoCountry = '',
+    this.geoCity = '',
     this.verified = false,
     this.social,
     this.plan = 'free',
@@ -98,6 +101,8 @@ class Account {
         'city': city,
         'address': address,
         'gender': gender,
+        'geoCountry': geoCountry,
+        'geoCity': geoCity,
         'birth': birth.toIso8601String(),
         'verified': verified,
         'social': social,
@@ -119,6 +124,8 @@ class Account {
         city: j['city'] as String,
         address: (j['address'] as String?) ?? '',
         gender: j['gender'] as String,
+        geoCountry: (j['geoCountry'] as String?) ?? '',
+        geoCity: (j['geoCity'] as String?) ?? '',
         birth: DateTime.parse(j['birth'] as String),
         verified: j['verified'] as bool,
         social: j['social'] as String?,

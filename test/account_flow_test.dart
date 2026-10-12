@@ -45,16 +45,38 @@ void main() {
       expect(_reg(s, mail: 'other@example.org'), 'acc_err_user_taken');
     });
 
-    test('sign in / out with e-mail or username; wrong password refused; unverified account asks for the code', () {
+    test('front-end sign-in is always accepted: existing account found, unknown identifier opens a demo account', () {
       final s = AppState();
       _reg(s);
-      expect(s.loginVisitor('ada', 'Secret123'), 'acc_err_unverified');
-      expect(s.verifyCode(s.pendingCode!), isNull);
-      s.logoutVisitor();
+      expect(s.loginVisitor('ada', 'anything'), isNull);
+      expect(s.me?.email, 'ada@example.org');
+      expect(s.me?.verified, isTrue);
+      s.logoutAll();
       expect(s.me, isNull);
-      expect(s.loginVisitor('ada@example.org', 'wrong'), 'acc_err_login');
-      expect(s.loginVisitor('ADA', 'Secret123'), isNull);
+      expect(s.loginVisitor('', ''), isNull, reason: 'empty fields accepted');
       expect(s.me, isNotNull);
+      s.logoutAll();
+      expect(s.loginVisitor('kofi@example.org', 'x'), isNull);
+      expect(s.me?.email, 'kofi@example.org');
+    });
+
+    test('partners: private spaces only for partners; public users stay in the public space', () {
+      final s = AppState()..showLanding = false;
+      s.loginVisitor('ada', '');
+      s.enterAfterAuth();
+      expect(s.role, 'public');
+      s.setRole('coop');
+      expect(s.role, 'public', reason: 'a public user cannot open a partner space');
+      s.logoutAll();
+      s.loginPartner('Union Sidama', 'p-01');
+      expect(s.partner, isTrue);
+      expect(s.showRoleChooser, isTrue);
+      s.setRole('exporter');
+      expect(s.role, 'exporter');
+      expect(s.canDownload, isTrue, reason: 'downloads included for partners');
+      s.logoutAll();
+      expect(s.partner, isFalse);
+      expect(s.role, 'public');
     });
 
     test('downloads are blocked without a subscription, allowed with one (and for the demo admin)', () {
@@ -120,7 +142,7 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text('Compte requis'), findsOneWidget);
       expect(find.text('Nom et prénoms'), findsOneWidget);
-      expect(find.text('Pays (membre de l’organisation)'), findsOneWidget);
+      expect(find.text('Géolocalisation approximative'.toUpperCase()), findsOneWidget);
     });
   });
 
@@ -164,10 +186,11 @@ void main() {
     await type('Adresse e-mail', 'ada@example.org');
     await type('Mot de passe', 'Secret123');
     await type('Confirmer le mot de passe', 'Secret123');
+    await type('Adresse', 'Rue des Jardins, Cocody');
     await type('Ville', 'Abidjan');
 
-    await t.ensureVisible(find.text('Pays (membre de l’organisation)'));
-    await t.tap(find.text('Pays (membre de l’organisation)'));
+    await t.ensureVisible(find.text('Pays'));
+    await t.tap(find.text('Pays'));
     await t.pumpAndSettle();
     await t.tap(find.text('Côte d’Ivoire').last);
     await t.pumpAndSettle();
@@ -243,7 +266,7 @@ void main() {
   }
 
   for (final e in {'phone': const Size(360, 780), 'tablet': const Size(820, 1180)}.entries) {
-    testWidgets('entrance: visitor identifies, chooses a profile, then enters the platform @ ${e.key}', (t) async {
+    testWidgets('entrance: public user goes to the public space; partner chooses a private space @ ${e.key}', (t) async {
       t.view.physicalSize = e.value;
       t.view.devicePixelRatio = 1;
       AppState.pageIds = navItems.map((n) => n.id).toList();
@@ -253,17 +276,31 @@ void main() {
       await t.pumpWidget(AppScope(state: s, child: MaterialApp(home: const AppShell())));
       await t.pump(const Duration(seconds: 1));
       expect(find.text('Identification du visiteur'), findsOneWidget);
-      expect(find.text('Centre de décision'), findsNothing, reason: 'dashboard not reachable before identification');
-      await t.tap(find.text('Continuer avec Google'));
-      await t.pump(const Duration(seconds: 1));
-      expect(find.text('Choisissez votre profil'), findsOneWidget);
-      s.setRole('coop');
+      // public user: sign-in tab, empty fields accepted
+      await t.tap(find.text('Se connecter').first);
+      await t.pump(const Duration(milliseconds: 600));
+      await t.ensureVisible(find.text('Me connecter'));
+      await t.tap(find.text('Me connecter'));
       await t.pump(const Duration(seconds: 2));
-      expect(find.text('Identification du visiteur'), findsNothing);
       expect(s.me, isNotNull);
-      s.logoutVisitor();
+      expect(s.role, 'public');
+      expect(find.text('Identification du visiteur'), findsNothing);
+      expect(find.text('Choisissez votre espace partenaire'), findsNothing);
+      // sign out → entrance; partner tab
+      s.logoutAll();
       await t.pump(const Duration(seconds: 1));
-      expect(find.text('Identification du visiteur'), findsOneWidget, reason: 'sign-out returns to the entrance');
+      expect(find.text('Identification du visiteur'), findsOneWidget);
+      await t.tap(find.text('Espace partenaire'));
+      await t.pump(const Duration(milliseconds: 600));
+      await t.ensureVisible(find.text('Accéder à l’espace partenaire'));
+      await t.tap(find.text('Accéder à l’espace partenaire'));
+      await t.pump(const Duration(seconds: 1));
+      expect(find.text('Choisissez votre espace partenaire'), findsOneWidget);
+      s.setRole('roaster');
+      await t.pump(const Duration(seconds: 2));
+      expect(s.role, 'roaster');
+      s.logoutAll();
+      await t.pump(const Duration(seconds: 1));
     });
   }
 }

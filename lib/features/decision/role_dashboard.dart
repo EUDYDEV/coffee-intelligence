@@ -7,6 +7,7 @@ import '../../data/demo/countries_data.dart';
 import '../../data/demo/quality_data.dart';
 import '../../data/demo/sustainability_data.dart';
 import '../../data/repository.dart';
+import '../../data/role_data.dart';
 import '../../data/demo/stock_data.dart';
 import '../../models/models.dart';
 import '../../widgets/charts.dart';
@@ -85,6 +86,15 @@ List<Widget> roleKpis(BuildContext context) {
   Widget k(String label, double v, String unit, IconData icon, {int d = 0, double? trend, bool inv = false, List<double>? sp, String metric = 'default'}) =>
       KpiCard(labelKey: label, metric: metric, value: v, unit: unit, decimals: d, trend: trend, invertTrend: inv, icon: icon, spark: sp);
   switch (app.role) {
+    case 'public':
+      return [
+        k('rk_members_prod', af.fold(0.0, (a, c) => a + c.prodKt), 'kt', Icons.spa_rounded, trend: 2.6, metric: 'production'),
+        k('kpi_exports', af.fold(0.0, (a, c) => a + c.exportsKt), 'kt', Icons.directions_boat_rounded, trend: 1.9, metric: 'exports'),
+        k('kpi_price', arab.last.v, r'$/lb', Icons.trending_up_rounded, d: 2, trend: 4.1, sp: spark, metric: 'price'),
+        k('kpi_producers', af.fold(0.0, (a, c) => a + c.producersK), 'k', Icons.people_alt_rounded, trend: .8),
+        k('rk_certified', avg((c) => c.certPct), '%', Icons.verified_rounded, trend: 1.4),
+        k('sustain_index', af.fold(0.0, (a, c) => a + sustainFor(c).overall) / af.length, '/100', Icons.eco_rounded, trend: 1.0, metric: 'sustain'),
+      ];
     case 'coop':
       final co = demoCoops.firstWhere((c) => c.id == app.myCoop);
       final pr = coopProfile(co);
@@ -161,6 +171,32 @@ class RolePanel extends StatelessWidget {
     }
 
     switch (app.role) {
+      case 'public':
+        final ranked = [...af]..sort((a, b) => b.prodKt.compareTo(a.prodKt));
+        return TwoCol(
+          flexL: 6,
+          flexR: 4,
+          left: GlassCard(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              SectionLabel(context.tr('rp_members', [af.length])),
+              BarChartW(height: 230, sourceId: 'production', unit: 'kt', legend: [(p.accent, context.tr('kpi_prod'))], fmt: (v) => Fmt.num(v, v < 10 ? 1 : 0), items: [for (final c in ranked) BarItem(c.id, c.prodKt, p.accent)], onTap: (i) {
+                app.selectCountry(ranked[i].id);
+                app.goto(navIndex('map'));
+              }),
+            ]),
+          ),
+          right: GlassCard(
+            accent: p.gold,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              SectionLabel(context.tr('rp_public_space')),
+              Text(context.tr('rp_public_space_d'), style: TS.bodyS(p).copyWith(color: p.text)),
+              const SizedBox(height: 12),
+              Wrap(spacing: 8, runSpacing: 8, children: [for (final r in partnerRoles) Chip2(context.tr(r.nameKey), p.muted, icon: Icons.lock_rounded)]),
+              const SizedBox(height: 14),
+              quick(),
+            ]),
+          ),
+        );
       case 'coop':
         final co = demoCoops.firstWhere((c) => c.id == app.myCoop);
         final me = coopProfile(co);
@@ -235,7 +271,7 @@ class RolePanel extends StatelessWidget {
           left: GlassCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SectionLabel(context.tr('rp_risk_zones')),
-              for (final c in z)
+              for (final c in z.take(8))
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 5),
                   child: Row(children: [

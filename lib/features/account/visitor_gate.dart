@@ -2,14 +2,24 @@ import 'package:flutter/material.dart';
 import '../../core/ctx.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/palette.dart';
+import '../../data/role_data.dart';
+import '../../widgets/common.dart';
 import '../../widgets/org_logo.dart';
 import '../../widgets/secret_tap.dart';
 import 'account_widgets.dart';
 
-/// Entry of the platform: the visitor identifies / registers once, then chooses a profile.
-/// Front-end demo: the account is stored on this device / browser only.
-class VisitorGate extends StatelessWidget {
+/// Entrance of the platform. Two kinds of users:
+/// - public users register (or sign in) and use the public space;
+/// - partner organisations sign in to their private spaces (cooperative / farmer, exporter, roaster, NGO, national board).
+/// Front-end demo: accounts are stored on this device / browser, credentials are not checked.
+class VisitorGate extends StatefulWidget {
   const VisitorGate({super.key});
+  @override
+  State<VisitorGate> createState() => _VisitorGateState();
+}
+
+class _VisitorGateState extends State<VisitorGate> {
+  late String _tab = context.app.gatePartnerTab ? 'partner' : 'public';
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +45,8 @@ class VisitorGate extends StatelessWidget {
       if (wide) ...[
         const SizedBox(height: 26),
         bullet(Icons.public_rounded, 'gate_b1'),
-        bullet(Icons.insights_rounded, 'gate_b2'),
+        bullet(Icons.person_rounded, 'gate_b2'),
+        bullet(Icons.handshake_rounded, 'gate_b5'),
         bullet(Icons.workspace_premium_rounded, 'gate_b3'),
         bullet(Icons.school_rounded, 'gate_b4'),
       ],
@@ -53,16 +64,26 @@ class VisitorGate extends StatelessWidget {
       shadowColor: Colors.black54,
       borderRadius: BorderRadius.circular(24),
       child: Padding(
-      padding: EdgeInsets.all(context.isMobile ? 16 : 26),
-      child: !app.accountsReady
-          ? const Padding(padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator()))
-          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(context.tr('gate_card_title'), style: TS.h2(p)),
-              const SizedBox(height: 4),
-              Text(context.tr('gate_card_sub'), style: TS.bodyS(p)),
-              const SizedBox(height: 16),
-              AuthPanel(onAuthed: app.enterAfterAuth),
-            ]),
+        padding: EdgeInsets.all(context.isMobile ? 16 : 26),
+        child: !app.accountsReady
+            ? const Padding(padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator()))
+            : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Segmented<String>(
+                  values: const ['public', 'partner'],
+                  selected: _tab,
+                  label: (v) => context.tr(v == 'public' ? 'gate_tab_public' : 'gate_tab_partner'),
+                  onChanged: (v) => setState(() => _tab = v),
+                ),
+                const SizedBox(height: 16),
+                if (_tab == 'public') ...[
+                  Text(context.tr('gate_card_title'), style: TS.h2(p)),
+                  const SizedBox(height: 4),
+                  Text(context.tr('gate_card_sub'), style: TS.bodyS(p)),
+                  const SizedBox(height: 16),
+                  AuthPanel(onAuthed: app.enterAfterAuth),
+                ] else
+                  const PartnerLoginPanel(),
+              ]),
       ),
     );
 
@@ -87,5 +108,49 @@ class VisitorGate extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Partner sign-in (cooperatives / farmers, exporters, roasters, NGOs, national board). Demo: always accepted.
+class PartnerLoginPanel extends StatefulWidget {
+  const PartnerLoginPanel({super.key});
+  @override
+  State<PartnerLoginPanel> createState() => _PartnerLoginPanelState();
+}
+
+class _PartnerLoginPanelState extends State<PartnerLoginPanel> {
+  final _org = TextEditingController(), _id = TextEditingController(), _pw = TextEditingController();
+
+  @override
+  void dispose() {
+    _org.dispose();
+    _id.dispose();
+    _pw.dispose();
+    super.dispose();
+  }
+
+  InputDecoration _dec(String label, IconData icon) => InputDecoration(labelText: label, prefixIcon: Icon(icon, size: 18), isDense: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)));
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal;
+    final app = context.app;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(context.tr('partner_title'), style: TS.h2(p)),
+      const SizedBox(height: 4),
+      Text(context.tr('partner_sub'), style: TS.bodyS(p)),
+      const SizedBox(height: 12),
+      Wrap(spacing: 8, runSpacing: 8, children: [for (final r in partnerRoles) Chip2(context.tr(r.nameKey), r.color, icon: r.icon)]),
+      const SizedBox(height: 16),
+      TextField(controller: _org, textCapitalization: TextCapitalization.words, decoration: _dec(context.tr('partner_org'), Icons.apartment_rounded)),
+      const SizedBox(height: 12),
+      TextField(controller: _id, decoration: _dec(context.tr('partner_id'), Icons.badge_outlined)),
+      const SizedBox(height: 12),
+      TextField(controller: _pw, obscureText: true, onSubmitted: (_) => app.loginPartner(_org.text, _id.text), decoration: _dec(context.tr('acc_password'), Icons.lock_outline_rounded)),
+      const SizedBox(height: 14),
+      SizedBox(width: double.infinity, child: PrimaryButton(context.tr('partner_btn'), icon: Icons.handshake_rounded, onTap: () => app.loginPartner(_org.text, _id.text))),
+      const SizedBox(height: 12),
+      const DemoNotice('partner_demo_note'),
+    ]);
   }
 }

@@ -82,7 +82,7 @@ class _AppShellState extends State<AppShell> {
     });
     if (app.showLogin) return const AdminLogin();
     // visitors identify / register at the entrance (front-end demo: account stored on this device)
-    if (app.requireAccount && !app.admin && app.me == null && !app.showLanding) return const VisitorGate();
+    if (app.requireAccount && !app.admin && !app.partner && app.me == null && !app.showLanding) return const VisitorGate();
     if (app.showRoleChooser) return const RoleChooserScreen();
     if (app.admin && app.adminView) return const AdminShell();
     if (app.showLanding) {
@@ -191,11 +191,21 @@ class _AppShellState extends State<AppShell> {
                 context.app.goto(navIndex('guide'));
               })),
               const SizedBox(width: 10),
-              Expanded(child: PrimaryButton(context.app.me == null ? context.tr('acc_signin') : '@${context.app.me!.username}', icon: Icons.workspace_premium_rounded, onTap: () {
+              Expanded(child: PrimaryButton(context.tr('nav_account'), icon: Icons.workspace_premium_rounded, onTap: () {
                 Navigator.pop(c);
                 context.app.goto(navIndex('account'));
               })),
             ]),
+            if (context.app.partner || context.app.me != null) ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: PrimaryButton('${context.tr('acc_logout')} · ${context.app.partner ? context.app.partnerOrg : '@${context.app.me!.username}'}', icon: Icons.logout_rounded, outlined: true, onTap: () {
+                  Navigator.pop(c);
+                  context.app.logoutAll();
+                }),
+              ),
+            ],
             const SizedBox(height: 12),
             Wrap(spacing: 10, runSpacing: 10, children: [
               for (var i = 0; i < navItems.length; i++)
@@ -424,7 +434,7 @@ class _DesktopTop extends StatelessWidget {
   }
 }
 
-/// Shortcut to the visitor account / subscription page.
+/// Account menu: who is signed in, account page, sign out.
 class _AccountChip extends StatelessWidget {
   final bool compact;
   const _AccountChip({required this.compact});
@@ -433,12 +443,34 @@ class _AccountChip extends StatelessWidget {
     final p = context.pal;
     final app = context.app;
     final me = app.me;
-    final active = me?.hasActivePlan == true;
-    final label = me == null ? (app.admin ? app.adminUser : context.tr('acc_signin')) : '@${me.username}';
-    final icon = me == null ? Icons.person_outline_rounded : (active ? Icons.workspace_premium_rounded : Icons.person_rounded);
-    void go() => app.goto(navIndex('account'));
-    if (compact) return IconButton(tooltip: label, onPressed: go, icon: Icon(icon, color: active ? p.green : p.muted));
-    return TextButton.icon(onPressed: go, icon: Icon(icon, size: 18, color: active ? p.green : p.muted), label: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 130), child: Text(label, overflow: TextOverflow.ellipsis, style: TextStyle(color: p.text, fontWeight: FontWeight.w600, fontSize: 13))));
+    final active = app.partner || me?.hasActivePlan == true;
+    final label = app.partner ? app.partnerOrg : (me == null ? (app.admin ? app.adminUser : context.tr('acc_signin')) : '@${me.username}');
+    final icon = app.partner ? Icons.handshake_rounded : (me == null ? Icons.person_outline_rounded : (active ? Icons.workspace_premium_rounded : Icons.person_rounded));
+    final canSignOut = app.partner || me != null;
+    return PopupMenuButton<String>(
+      tooltip: label,
+      color: p.surface,
+      onSelected: (v) {
+        if (v == 'account') app.goto(navIndex('account'));
+        if (v == 'logout') app.logoutAll();
+      },
+      itemBuilder: (_) => [
+        PopupMenuItem(enabled: false, child: Text(context.tr(app.partner ? 'user_partner' : 'user_public').toUpperCase(), style: TS.label(p))),
+        PopupMenuItem(value: 'account', child: Row(children: [Icon(Icons.workspace_premium_rounded, color: p.accent, size: 20), const SizedBox(width: 10), Text(context.tr('nav_account'))])),
+        if (canSignOut) PopupMenuItem(value: 'logout', child: Row(children: [Icon(Icons.logout_rounded, color: p.alert, size: 20), const SizedBox(width: 10), Text(context.tr('acc_logout'))])),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(icon, size: 20, color: active ? p.green : p.muted),
+          if (!compact) ...[
+            const SizedBox(width: 6),
+            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 140), child: Text(label, overflow: TextOverflow.ellipsis, style: TextStyle(color: p.text, fontWeight: FontWeight.w600, fontSize: 13))),
+          ],
+          Icon(Icons.expand_more_rounded, size: 18, color: p.muted),
+        ]),
+      ),
+    );
   }
 }
 

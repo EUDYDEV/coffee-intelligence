@@ -1,7 +1,7 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../../core/ctx.dart';
 import '../../core/format.dart';
+import '../../core/geo/geo.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/palette.dart';
 import '../../data/account_data.dart';
@@ -67,25 +67,42 @@ class _AuthPanelState extends State<AuthPanel> {
   final _form = GlobalKey<FormState>();
   final _name = TextEditingController(), _user = TextEditingController(), _mail = TextEditingController();
   final _pw = TextEditingController(), _pw2 = TextEditingController(), _city = TextEditingController(), _addr = TextEditingController();
+  final _geoCountry = TextEditingController(), _geoCity = TextEditingController(), _otherCountry = TextEditingController();
   final _loginId = TextEditingController(), _loginPw = TextEditingController(), _code = TextEditingController();
-  String? _country, _gender;
+  String? _country, _gender; // _country: member country id, or 'OTHER'
   DateTime? _birth;
   bool _consent = false, _hide = true;
   String? _error;
 
   @override
   void dispose() {
-    for (final c in [_name, _user, _mail, _pw, _pw2, _city, _addr, _loginId, _loginPw, _code]) {
+    for (final c in [_name, _user, _mail, _pw, _pw2, _city, _addr, _geoCountry, _geoCity, _otherCountry, _loginId, _loginPw, _code]) {
       c.dispose();
     }
     super.dispose();
   }
 
-  void _detectRegion() {
-    final cc = ui.PlatformDispatcher.instance.locale.countryCode;
-    final id = cc == null ? null : _iso2[cc.toUpperCase()];
-    setState(() => _country = id);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text(context.tr(id == null ? 'acc_geo_none' : 'acc_geo_ok'))));
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _detectRegion(quiet: true);
+    });
+  }
+
+  /// Approximate geolocation (country, city) from the device settings — no GPS, no server.
+  void _detectRegion({bool quiet = false}) {
+    final loc = approximateLocation();
+    final member = loc.iso2 == null ? null : _iso2[loc.iso2!];
+    setState(() {
+      _geoCountry.text = member != null ? context.tr('mc_$member') : (loc.iso2 ?? '');
+      if (loc.city != null) _geoCity.text = loc.city!;
+      _country ??= member;
+      if (_city.text.isEmpty && loc.city != null) _city.text = loc.city!;
+    });
+    if (!quiet) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text(context.tr(loc.iso2 == null && loc.city == null ? 'acc_geo_none' : 'acc_geo_ok'))));
+    }
   }
 
   Future<void> _pickBirth() async {
@@ -101,7 +118,8 @@ class _AuthPanelState extends State<AuthPanel> {
 
   void _submitRegister() {
     final ok = _form.currentState!.validate();
-    if (!ok || _birth == null || _country == null || _gender == null || !_consent) {
+    final other = _country == 'OTHER';
+    if (!ok || _birth == null || _country == null || (other && _otherCountry.text.trim().isEmpty) || _gender == null || !_consent) {
       setState(() => _error = 'acc_err_incomplete');
       return;
     }
@@ -110,11 +128,13 @@ class _AuthPanelState extends State<AuthPanel> {
       username: _user.text,
       email: _mail.text,
       password: _pw.text,
-      country: _country!,
+      country: other ? _otherCountry.text.trim() : _country!,
       city: _city.text,
       address: _addr.text,
       birth: _birth!,
       gender: _gender!,
+      geoCountry: _geoCountry.text.trim(),
+      geoCity: _geoCity.text.trim(),
     );
     setState(() {
       _error = err;
@@ -226,43 +246,37 @@ class _AuthPanelState extends State<AuthPanel> {
       Form(
         key: _form,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          // Order and fields follow the client's list of mandatory identification information.
           SectionLabel(c.tr('acc_sec_identity')),
+          // 1. full name
           _row([
             TextFormField(controller: _name, textCapitalization: TextCapitalization.words, decoration: _dec(c, c.tr('acc_fullname'), icon: Icons.badge_outlined), validator: (v) => (v ?? '').trim().length < 3 ? c.tr('acc_err_required') : null),
-            TextFormField(controller: _user, decoration: _dec(c, c.tr('acc_username'), icon: Icons.alternate_email_rounded), validator: (v) => RegExp(r'^[A-Za-z0-9_.]{3,24}$').hasMatch((v ?? '').trim()) ? null : c.tr('acc_err_username')),
           ]),
+          // 2. e-mail (unique + verification)
           _row([
-            TextFormField(controller: _mail, keyboardType: TextInputType.emailAddress, decoration: _dec(c, c.tr('acc_email'), icon: Icons.mail_outline_rounded), validator: (v) => validEmail(v ?? '') ? null : c.tr('acc_err_email')),
+            TextFormField(controller: _mail, keyboardType: TextInputType.emailAddress, decoration: _dec(c, c.tr('acc_email'), icon: Icons.mail_outline_rounded, hint: c.tr('acc_email_hint')), validator: (v) => validEmail(v ?? '') ? null : c.tr('acc_err_email')),
+          ]),
+          // 3. password (hashed) — or social sign-in above
+          _row([
             TextFormField(
               controller: _pw,
               obscureText: _hide,
-              decoration: _dec(c, c.tr('acc_password'), icon: Icons.lock_outline_rounded).copyWith(suffixIcon: IconButton(icon: Icon(_hide ? Icons.visibility_rounded : Icons.visibility_off_rounded, size: 18), onPressed: () => setState(() => _hide = !_hide))),
+              decoration: _dec(c, c.tr('acc_password'), icon: Icons.lock_outline_rounded, hint: c.tr('acc_password_hint')).copyWith(suffixIcon: IconButton(icon: Icon(_hide ? Icons.visibility_rounded : Icons.visibility_off_rounded, size: 18), onPressed: () => setState(() => _hide = !_hide))),
               validator: (v) => strongPassword(v ?? '') ? null : c.tr('acc_err_password'),
             ),
-          ]),
-          _row([
             TextFormField(controller: _pw2, obscureText: _hide, decoration: _dec(c, c.tr('acc_password2'), icon: Icons.lock_reset_rounded), validator: (v) => v == _pw.text ? null : c.tr('acc_err_password2')),
-            const SizedBox(),
           ]),
-          SectionLabel(c.tr('acc_sec_location')),
+          // 4. username
           _row([
-            DropdownButtonFormField<String>(
-              isExpanded: true,
-              initialValue: _country,
-              decoration: _dec(c, c.tr('acc_country'), icon: Icons.public_rounded),
-              items: [for (final id in memberCountries) DropdownMenuItem(value: id, child: Text(c.tr('mc_$id'), overflow: TextOverflow.ellipsis))],
-              onChanged: (v) => setState(() => _country = v),
-              validator: (v) => v == null ? c.tr('acc_err_required') : null,
-            ),
-            TextFormField(controller: _city, textCapitalization: TextCapitalization.words, decoration: _dec(c, c.tr('acc_city'), icon: Icons.location_city_rounded), validator: (v) => (v ?? '').trim().isEmpty ? c.tr('acc_err_required') : null),
+            TextFormField(controller: _user, decoration: _dec(c, c.tr('acc_username'), icon: Icons.alternate_email_rounded), validator: (v) => RegExp(r'^[A-Za-z0-9_.]{3,24}$').hasMatch((v ?? '').trim()) ? null : c.tr('acc_err_username')),
           ]),
+          // 5. approximate geolocation (country, city)
+          SectionLabel(c.tr('acc_sec_geo'), trailing: TextButton.icon(onPressed: _detectRegion, icon: const Icon(Icons.my_location_rounded, size: 18), label: Text(c.tr('acc_geo')))),
           _row([
-            TextFormField(controller: _addr, decoration: _dec(c, c.tr('acc_address'), icon: Icons.home_outlined)),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(onPressed: _detectRegion, icon: const Icon(Icons.my_location_rounded, size: 18), label: Text(c.tr('acc_geo'))),
-            ),
+            TextFormField(controller: _geoCountry, decoration: _dec(c, c.tr('acc_geo_country'), icon: Icons.travel_explore_rounded)),
+            TextFormField(controller: _geoCity, decoration: _dec(c, c.tr('acc_geo_city'), icon: Icons.near_me_outlined)),
           ]),
+          // 6. date of birth / gender
           SectionLabel(c.tr('acc_sec_profile')),
           _row([
             InkWell(
@@ -282,6 +296,30 @@ class _AuthPanelState extends State<AuthPanel> {
               validator: (v) => v == null ? c.tr('acc_err_required') : null,
             ),
           ]),
+          // 7. address / city / country
+          SectionLabel(c.tr('acc_sec_address')),
+          _row([
+            TextFormField(controller: _addr, decoration: _dec(c, c.tr('acc_address'), icon: Icons.home_outlined), validator: (v) => (v ?? '').trim().isEmpty ? c.tr('acc_err_required') : null),
+          ]),
+          _row([
+            TextFormField(controller: _city, textCapitalization: TextCapitalization.words, decoration: _dec(c, c.tr('acc_city'), icon: Icons.location_city_rounded), validator: (v) => (v ?? '').trim().isEmpty ? c.tr('acc_err_required') : null),
+            DropdownButtonFormField<String>(
+              key: ValueKey('country_$_country'),
+              isExpanded: true,
+              initialValue: _country,
+              decoration: _dec(c, c.tr('acc_country'), icon: Icons.public_rounded),
+              items: [
+                for (final id in [...memberCountries]..sort((a, b) => c.tr('mc_$a').compareTo(c.tr('mc_$b')))) DropdownMenuItem(value: id, child: Text(c.tr('mc_$id'), overflow: TextOverflow.ellipsis)),
+                DropdownMenuItem(value: 'OTHER', child: Text(c.tr('acc_country_other'), overflow: TextOverflow.ellipsis)),
+              ],
+              onChanged: (v) => setState(() => _country = v),
+              validator: (v) => v == null ? c.tr('acc_err_required') : null,
+            ),
+          ]),
+          if (_country == 'OTHER')
+            _row([
+              TextFormField(controller: _otherCountry, textCapitalization: TextCapitalization.words, decoration: _dec(c, c.tr('acc_country_other_name'), icon: Icons.flag_outlined), validator: (v) => (v ?? '').trim().isEmpty ? c.tr('acc_err_required') : null),
+            ]),
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.leading,

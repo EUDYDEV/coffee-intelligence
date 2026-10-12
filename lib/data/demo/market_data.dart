@@ -131,4 +131,8 @@ const transportCosts = <String, double>{
   'DAR': 156,
   'ABJ': 96,
   'SPY': 104,
+  'DLA': 126,
+  'CKY': 132,
+  'LFW': 98,
+  'TMM': 141,
 };

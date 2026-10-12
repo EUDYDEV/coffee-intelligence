@@ -16,11 +16,12 @@ class RoleSwitcher extends StatelessWidget {
     final p = context.pal;
     final app = context.app;
     final r = app.roleDef;
-    final list = app.admin ? roles : publicRoles;
+    // public users: public space only (partner spaces are private); partners: their spaces; admin: everything
+    final list = app.admin ? roles : (app.partner ? partnerRoles : [roleById('public')]);
     return PopupMenuButton<String>(
       tooltip: context.tr('role_switch'),
       color: p.surface,
-      onSelected: (id) => app.setRole(id),
+      onSelected: (id) => id == '__partner' ? app.logoutAll(toPartner: true) : app.setRole(id),
       itemBuilder: (_) => [
         PopupMenuItem(enabled: false, child: Text(context.tr('role_view_as').toUpperCase(), style: TS.label(p))),
         for (final x in list)
@@ -33,6 +34,11 @@ class RoleSwitcher extends StatelessWidget {
               if (x.id == r.id) Icon(Icons.check_rounded, size: 18, color: p.green),
             ]),
           ),
+        if (!app.admin && !app.partner) ...[
+          const PopupMenuDivider(),
+          PopupMenuItem(enabled: false, child: Text(context.tr('partner_spaces_locked'), style: TextStyle(fontSize: 12, color: p.muted))),
+          PopupMenuItem(value: '__partner', child: Row(children: [Icon(Icons.handshake_rounded, color: p.accent, size: 20), const SizedBox(width: 10), Expanded(child: Text(context.tr('partner_signin'), style: TextStyle(color: p.text)))])),
+        ],
       ],
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 12, vertical: 8),
@@ -74,12 +80,12 @@ class RoleChooserScreen extends StatelessWidget {
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
                   const OrgLogo(height: 56),
                   const SizedBox(height: 22),
-                  Text(context.tr('role_choose_title'), textAlign: TextAlign.center, style: const TextStyle(fontFamily: TS.display, color: CI.cream, fontSize: 30, fontWeight: FontWeight.w700)),
+                  Text(context.tr(app.admin ? 'role_choose_title' : 'partner_choose_title'), textAlign: TextAlign.center, style: const TextStyle(fontFamily: TS.display, color: CI.cream, fontSize: 30, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 6),
-                  Text(context.tr('role_choose_sub', [app.admin ? app.adminUser : (app.me?.fullName ?? '')]), textAlign: TextAlign.center, style: TextStyle(color: CI.cream.withValues(alpha: .7), fontSize: 14)),
+                  Text(context.tr(app.admin ? 'role_choose_sub' : 'partner_choose_sub', [app.admin ? app.adminUser : app.partnerOrg]), textAlign: TextAlign.center, style: TextStyle(color: CI.cream.withValues(alpha: .7), fontSize: 14)),
                   const SizedBox(height: 22),
                   Grid(columns: context.cols(desktop: 3, tablet: 2, mobile: 1), gap: 12, children: [
-                    for (final r in app.admin ? roles : publicRoles)
+                    for (final r in app.admin ? roles : partnerRoles)
                       GestureDetector(
                         onTap: () => app.setRole(r.id),
                         child: MouseRegion(
@@ -104,7 +110,7 @@ class RoleChooserScreen extends StatelessWidget {
                   ]),
                   const SizedBox(height: 18),
                   Text(context.tr('role_sim_note'), textAlign: TextAlign.center, style: TextStyle(color: CI.cream.withValues(alpha: .6), fontSize: 11.5)),
-                  TextButton(onPressed: app.admin ? app.logout : app.logoutVisitor, child: Text(context.tr(app.admin ? 'adm_logout' : 'acc_logout'), style: const TextStyle(color: CI.gold))),
+                  TextButton(onPressed: app.admin ? app.logout : app.logoutAll, child: Text(context.tr(app.admin ? 'adm_logout' : 'acc_logout'), style: const TextStyle(color: CI.gold))),
                 ]),
               ),
             ),
@@ -137,7 +143,7 @@ class RestrictedPage extends StatelessWidget {
               const SizedBox(height: 16),
               Text(context.tr('restricted_title'), textAlign: TextAlign.center, style: TS.h2(p)),
               const SizedBox(height: 6),
-              Text(context.tr('restricted_text', [context.tr(pageNameKey), context.tr(r.nameKey)]), textAlign: TextAlign.center, style: TS.bodyS(p).copyWith(fontSize: 14)),
+              Text(r.id == 'public' ? context.tr('restricted_partner', [context.tr(pageNameKey)]) : context.tr('restricted_text', [context.tr(pageNameKey), context.tr(r.nameKey)]), textAlign: TextAlign.center, style: TS.bodyS(p).copyWith(fontSize: 14)),
               const SizedBox(height: 16),
               Wrap(spacing: 10, runSpacing: 10, alignment: WrapAlignment.center, children: [
                 PrimaryButton(context.tr('restricted_request'), icon: Icons.mail_outline_rounded, outlined: true, onTap: () {

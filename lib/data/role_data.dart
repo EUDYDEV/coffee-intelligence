@@ -28,6 +28,10 @@ const permissionKeys = [
 ];
 
 const roles = <RoleDef>[
+  // Public user (registered visitor): public dashboards; partner tools are locked.
+  RoleDef('public', 'role_public', 'role_public_d', Icons.public_rounded, Color(0xFF7A5230),
+      ['decision', 'market', 'production', 'map', 'sustain', 'compare', 'forecast', 'reports', 'guide', 'account'], {'alerts', 'simulator', 'revenue'}, 'production', 'flow',
+      {'perm_view_dash': true, 'perm_view_prices': true, 'perm_view_income': false, 'perm_view_trace': false, 'perm_export': true, 'perm_alerts': false, 'perm_reports_sched': false, 'perm_edit_data': false, 'perm_validate': false, 'perm_manage_users': false, 'perm_sell': false}),
   RoleDef('coop', 'role_coop', 'role_coop_d', Icons.agriculture_rounded, Color(0xFF4F6F52),
       ['decision', 'production', 'revenue', 'certs', 'compare', 'market', 'forecast', 'alerts', 'reports', 'map'], {'simulator', 'sources'}, 'quality', 'flow',
       {'perm_view_dash': true, 'perm_view_prices': true, 'perm_view_income': true, 'perm_view_trace': true, 'perm_export': true, 'perm_alerts': true, 'perm_reports_sched': true, 'perm_edit_data': false, 'perm_validate': false, 'perm_manage_users': false, 'perm_sell': false}),
@@ -50,5 +54,10 @@ const roles = <RoleDef>[
 
 RoleDef roleById(String id) => roles.firstWhere((r) => r.id == id);
 
-/// Public (non-admin) profiles that anyone can simulate from the profile selector.
+/// Every non-admin profile (public space + partner spaces).
 List<RoleDef> get publicRoles => roles.where((r) => r.id != 'admin').toList();
+
+/// Private spaces reserved to partner organisations (cooperatives / farmers, exporters, roasters, NGOs, national board).
+List<RoleDef> get partnerRoles => roles.where((r) => r.id != 'admin' && r.id != 'public').toList();
+
+bool isPartnerSpace(String id) => id != 'public' && id != 'admin';
