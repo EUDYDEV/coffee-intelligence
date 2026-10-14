@@ -589,6 +589,7 @@ class AdminKpiPage extends StatelessWidget {
                     Text(context.tr(k.nameKey), style: TS.h3(p).copyWith(fontSize: 15)),
                     const SizedBox(height: 2),
                     Text(context.tr(k.defKey), style: TS.bodyS(p).copyWith(fontSize: 12)),
+                    if (_methodOf(k.id) != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text('${context.tr('ref_ind_method')} : ${context.tr(_methodOf(k.id)!)}', style: TS.bodyS(p).copyWith(fontSize: 11.5, fontStyle: FontStyle.italic))),
                   ]),
                 ),
                 _kv(context, context.tr('adm_kpi_unit'), k.unit.startsWith(r'$') ? Fmt.unit(k.unit) : k.unit),
@@ -641,4 +642,12 @@ class AdminRulesPage extends StatelessWidget {
       ),
     ]);
   }
+}
+
+
+/// Calculation-method key of the catalogue indicator that matches an admin KPI id.
+String? _methodOf(String kpiId) {
+  const map = {'income': 'income', 'arabica': 'price_arabica', 'robusta': 'price_robusta', 'production': 'prod', 'exports': 'exports', 'yield': 'yield', 'climate': 'climate', 'cert': 'cert', 'delay': 'delay', 'quality': 'quality'};
+  final id = map[kpiId];
+  return id == null ? null : 'ix_${id}_m';
 }

@@ -4,6 +4,7 @@ import '../../data/admin_data.dart';
 import '../../data/demo/cert_weather_data.dart';
 import '../../data/demo/countries_data.dart';
 import '../../data/demo/quality_data.dart';
+import '../../data/reference_data.dart';
 import '../../data/repository.dart';
 import '../format.dart';
 
@@ -30,6 +31,18 @@ ExportSection _dataset(String id, String Function(String, [List<Object>]) t) {
 ExportDoc buildExport(String pageId, String Function(String, [List<Object>]) t) {
   final title = t('nav_$pageId');
   switch (pageId) {
+    case 'reference':
+      return ExportDoc(t('ref_title'), [t('ref_sub')], [
+        ExportSection(t('ref_tab_countries'), [t('col_country'), t('kpi_prod'), t('kpi_exports'), t('kpi_producers')], [
+          for (final c in repo.countries(africaOnly: true)) [t(c.nameKey), '${Fmt.num(c.prodKt, c.prodKt < 10 ? 1 : 0)} kt', '${Fmt.num(c.exportsKt, c.exportsKt < 10 ? 1 : 0)} kt', '${Fmt.num(c.producersK, 1)} k']
+        ]),
+        ExportSection(t('ref_tab_focal'), [t('col_country'), t('acc_fullname'), t('ref_tab_focal'), t('acc_email'), 'Tel'], [
+          for (final f in focalPoints) [t('c_${f.country}'), f.name, t(f.titleKey), f.email, f.phone]
+        ]),
+        ExportSection(t('ref_tab_indicators'), [t('ref_tab_indicators'), t('ref_ind_unit'), t('ref_ind_def'), t('ref_ind_method'), t('ref_ind_freq')], [
+          for (final i in indicatorCatalogue) [t(i.nameKey), i.unit, t(i.defKey), t(i.methodKey), t(i.freqKey)]
+        ]),
+      ]);
     case 'market':
       return ExportDoc(title, [t('market_sub')], [_dataset('prices', t), _dataset('ports', t)]);
     case 'production':

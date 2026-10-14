@@ -40,6 +40,7 @@ double itemPriceUsd(String kind) => switch (kind) {
     };
 
 const payMethods = <String>['momo', 'card', 'bank'];
+const momoOperators = <String>['orange', 'mtn', 'wave', 'mpesa', 'airtel'];
 
 class Purchase {
   final String id, kind, label, method; // kind: plan | item
@@ -64,6 +65,7 @@ class Account {
   String cycle; // month | year
   DateTime? planUntil;
   final List<Purchase> purchases;
+  Map<String, String> billing; // billing / payment preferences (no card data)
 
   Account({
     required this.id,
@@ -86,7 +88,9 @@ class Account {
     this.cycle = 'month',
     this.planUntil,
     List<Purchase>? purchases,
-  }) : purchases = purchases ?? [];
+    Map<String, String>? billing,
+  })  : purchases = purchases ?? [],
+        billing = billing ?? {};
 
   bool get hasActivePlan => planById(plan).downloads && planUntil != null && planUntil!.isAfter(DateTime.now());
 
@@ -111,6 +115,7 @@ class Account {
         'cycle': cycle,
         'planUntil': planUntil?.toIso8601String(),
         'purchases': [for (final p in purchases) p.toJson()],
+        'billing': billing,
       };
 
   factory Account.fromJson(Map<String, dynamic> j) => Account(
@@ -134,6 +139,7 @@ class Account {
         cycle: j['cycle'] as String,
         planUntil: j['planUntil'] == null ? null : DateTime.parse(j['planUntil'] as String),
         purchases: [for (final p in (j['purchases'] as List? ?? const [])) Purchase.fromJson(p as Map<String, dynamic>)],
+        billing: {for (final e in ((j['billing'] as Map?) ?? const {}).entries) '${e.key}': '${e.value}'},
       );
 }
 

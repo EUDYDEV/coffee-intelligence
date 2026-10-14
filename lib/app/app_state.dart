@@ -12,7 +12,7 @@ import '../models/models.dart';
 class AppState extends ChangeNotifier {
   /// Page ids in navigation order (set once by the navigation module).
   static List<String> pageIds = const [];
-  static const exportable = {'decision', 'market', 'production', 'revenue', 'sustain', 'certs', 'chain', 'map', 'compare', 'forecast', 'anomalies', 'alerts', 'sources'};
+  static const exportable = {'decision', 'market', 'production', 'revenue', 'sustain', 'certs', 'chain', 'map', 'compare', 'forecast', 'anomalies', 'alerts', 'sources', 'reference'};
   static String? currentPageId(int i) => i >= 0 && i < pageIds.length ? pageIds[i] : null;
 
   ThemeMode themeMode = ThemeMode.light;
@@ -371,6 +371,15 @@ class AppState extends ChangeNotifier {
   }
 
   void logoutVisitor() => logoutAll();
+
+  /// Saves the billing / payment preferences of the signed-in visitor (stored locally).
+  void saveBilling(Map<String, String> data) {
+    final a = me;
+    if (a == null) return;
+    a.billing = {...a.billing, ...data};
+    _saveAccounts();
+    notifyListeners();
+  }
 
   /// Simulated payment of a subscription (no money moves).
   void subscribe(String planId, String cycle, String method) {

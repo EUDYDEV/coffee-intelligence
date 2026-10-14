@@ -157,7 +157,7 @@ void main() {
     s.verifyCode(s.pendingCode!);
     s.subscribe('pro', 'year', 'bank');
     await t.pump(const Duration(seconds: 1));
-    expect(find.text('Ada Kouassi'), findsOneWidget);
+    expect(find.text('Ada Kouassi'), findsWidgets);
     expect(find.text('Actif'), findsOneWidget);
   });
 

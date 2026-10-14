@@ -10,6 +10,7 @@ import '../decision/decision_page.dart';
 import '../forecast/forecast_page.dart';
 import '../guide/guide_page.dart';
 import '../map/map_page.dart';
+import '../reference/reference_page.dart';
 import '../market/market_page.dart';
 import '../production/production_hub.dart';
 import '../reports/reports_page.dart';
@@ -42,6 +43,7 @@ final navItems = <NavDef>[
   NavDef('reports', Icons.description_rounded, 'nav_reports', () => const ReportsPage()),
   NavDef('sources', Icons.hub_rounded, 'nav_sources', () => const SourcesPage()),
   NavDef('simulator', Icons.tune_rounded, 'nav_simulator', () => const SimulatorPage()),
+  NavDef('reference', Icons.menu_book_rounded, 'nav_reference', () => const ReferencePage()),
   NavDef('guide', Icons.school_rounded, 'nav_guide', () => const GuidePage()),
   NavDef('account', Icons.workspace_premium_rounded, 'nav_account', () => const AccountPage()),
   NavDef('compliance', Icons.fact_check_rounded, 'nav_compliance', () => const CompliancePage()),

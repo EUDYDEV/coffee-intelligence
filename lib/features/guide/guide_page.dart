@@ -25,6 +25,7 @@ const _tasks = <_Task>[
   _Task('export', Icons.ios_share_rounded, 'decision'),
   _Task('account', Icons.workspace_premium_rounded, 'account'),
   _Task('sources', Icons.hub_rounded, 'sources'),
+  _Task('reference', Icons.menu_book_rounded, 'reference'),
 ];
 
 const _quick = <(IconData, String)>[

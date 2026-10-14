@@ -51,6 +51,8 @@ const _reqs = <_Req>[
   _Req('tor_s5', 'req_alerts', 'fn_alerts', 'alerts', St.complete),
   _Req('tor_s5', 'req_export', 'fn_export', 'market', St.complete),
   _Req('tor_s6', 'req_guide', 'fn_guide', 'guide', St.complete),
+  _Req('tor_s6', 'req_reference', 'fn_reference', 'reference', St.complete),
+  _Req('tor_s6', 'req_billing', 'fn_billing', 'account', St.simulated),
   _Req('tor_s6', 'req_signup', 'fn_signup', 'account', St.simulated),
   _Req('tor_s6', 'req_paywall', 'fn_paywall', 'account', St.simulated),
   // 6. Users

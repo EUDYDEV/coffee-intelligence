@@ -463,7 +463,7 @@ class PayPanel extends StatefulWidget {
 }
 
 class _PayPanelState extends State<PayPanel> {
-  String _method = 'momo';
+  late String _method = (context.app.me?.billing['method'] ?? 'momo');
   bool _busy = false;
 
   Future<void> _pay() async {
@@ -488,6 +488,11 @@ class _PayPanelState extends State<PayPanel> {
         ]),
       ),
       const SizedBox(height: 14),
+      if ((context.app.me?.billing['name'] ?? '').isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Text('${context.tr('bill_name')} : ${context.app.me!.billing['name']}${(context.app.me!.billing['email'] ?? '').isEmpty ? '' : ' · ${context.app.me!.billing['email']}'}', style: TS.bodyS(p)),
+        ),
       SectionLabel(context.tr('pay_method')),
       for (final m in payMethods)
         Padding(
